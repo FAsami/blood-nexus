@@ -5,8 +5,9 @@ import { fonts } from './fonts/font'
 import clsx from 'clsx'
 
 export const metadata: Metadata = {
-  title: 'Roktodan - Blood Donation Platform',
-  description: 'Save lives through blood donation'
+  title: 'রক্তদান - রক্তদান প্ল্যাটফর্ম | Roktodan - Blood Donation Platform',
+  description:
+    'রক্তদানের মাধ্যমে জীবন বাঁচান | Save lives through blood donation'
 }
 
 const RootLayout = ({ children }: { children: React.ReactNode }) => {
