@@ -1,10 +1,9 @@
 'use client'
 import { useState } from 'react'
-import { IoSearchOutline } from 'react-icons/io5'
-import { FaMapMarkerAlt } from 'react-icons/fa'
 import { RadioButton } from './components/RadioButton'
 import { MdBloodtype } from 'react-icons/md'
 import { BiSolidDonateBlood } from 'react-icons/bi'
+import { SearchDonors } from './components/SearchDonors'
 
 const Home = () => {
   const [selectedBlood, setSelectedBlood] = useState('B+')
@@ -48,21 +47,7 @@ const Home = () => {
               />
             </div>
           </div>
-          <div className="relative">
-            <FaMapMarkerAlt className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-xl" />
-            <input
-              type="text"
-              placeholder="Enter location"
-              className="w-full p-4 pl-12 pr-16 rounded-full border border-gray-200 focus:ring-2 focus:ring-red-500 focus:border-transparent focus:outline-none"
-            />
-            <button
-              className="absolute  flex items-center gap-1  px-4 right-2 top-1/2 -translate-y-1/2 p-2 bg-red-500 hover:bg-red-600 text-white rounded-full transition-colors duration-200"
-              aria-label="Search"
-            >
-              <IoSearchOutline className="text-2xl md:text-3xl" />{' '}
-              <span className="hidden md:inline">Search Donors</span>
-            </button>
-          </div>
+          <SearchDonors />
         </div>
       </div>
 
