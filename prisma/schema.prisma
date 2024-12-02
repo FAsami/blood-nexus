@@ -7,132 +7,51 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
 model User {
-  id            String          @id @default(cuid())
+  id            String    @id @default(cuid())
   name          String?
-  phone         String?
-  phoneVerified DateTime?
-  email         String          @unique
+  email         String?   @unique
   emailVerified DateTime?
+  phone         String?   @unique
+  phoneVerified DateTime?
+  password      String?
   image         String?
   accounts      Account[]
-  sessions      Session[] 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  donationRequests DonationRequest[]
+  sessions      Session[]
 }
- 
+
 model Account {
+  id                String  @id @default(cuid())
   userId            String
   type              String
   provider          String
   providerAccountId String
-  refresh_token     String?
-  access_token      String?
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
   expires_at        Int?
   token_type        String?
   scope             String?
-  id_token          String?
+  id_token          String? @db.Text
   session_state     String?
- 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
- 
+
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  @@id([provider, providerAccountId])
+
+  @@unique([provider, providerAccountId])
 }
- 
+
 model Session {
+  id           String   @id @default(cuid())
   sessionToken String   @unique
   userId       String
   expires      DateTime
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
- 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
 }
- 
+
 model VerificationToken {
   identifier String
-  token      String
+  token      String   @unique
   expires    DateTime
- 
-  @@id([identifier, token])
+
+  @@unique([identifier, token])
 }
-
-
-
-enum BloodGroup {
-  A_POSITIVE
-  A_NEGATIVE
-  B_POSITIVE
-  B_NEGATIVE
-  O_POSITIVE
-  O_NEGATIVE
-  AB_POSITIVE
-  AB_NEGATIVE
-}
-
-enum RequestStatus {
-  PENDING
-  FULFILLED
-  CANCELLED
-}
-
-enum RequestUrgency {
-  NORMAL
-  URGENT
-  EMERGENCY
-}
-
-
-model Patient {
-  id              String            @id @default(cuid())
-  name            String
-  age             Int
-  bloodGroup      BloodGroup
-  medicalNotes    String?
-  donationRequests DonationRequest[]
-  createdAt       DateTime          @default(now())
-  updatedAt       DateTime          @updatedAt
-}
-model DonationRequest {
-  id              String        @id @default(cuid())
-  patientId       String        
-  patient         Patient       @relation(fields: [patientId], references: [id])
-  unitsNeeded     Int
-  locationId      String        
-  location        Location      @relation(fields: [locationId], references: [id])
-  userId          String        
-  user            User          @relation(fields: [userId], references: [id])
-  urgency         RequestUrgency @default(NORMAL)
-  status          RequestStatus  @default(PENDING)
-  requiredBefore  DateTime
-  reason          String
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
-}
-
-model Location {
-  id                String            @id @default(cuid())
-  placeId           String            @unique  
-  name              String           
-  formattedAddress  String            
-  area              String?           
-  city              String           
-  district          String?           
-  division          String?           
-  country           String
-  postalCode        String?
-  latitude          Float
-  longitude         Float
-  phoneNumber       String?
-  isVerified        Boolean           @default(false)
-  donationRequests  DonationRequest[]
-  createdAt         DateTime          @default(now())
-  updatedAt         DateTime          @updatedAt
-}
-
 

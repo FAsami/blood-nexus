@@ -14,6 +14,7 @@ import {
   FaBars,
   FaTimes
 } from 'react-icons/fa'
+import { BloodtypeSharp } from '@mui/icons-material'
 
 const Header = () => {
   const [isVisible, setIsVisible] = useState(true)
@@ -103,7 +104,7 @@ const Header = () => {
                 className="h-8 md:h-12 w-auto"
               />
               <span className="text-lg md:text-xl font-medium text-red-500 font-bengali hidden sm:block">
-                রক্তদান প্ল্যাটফর্ম
+                <BloodtypeSharp fontSize="large" color="primary" /> Roktodan
               </span>
             </Link>
 
