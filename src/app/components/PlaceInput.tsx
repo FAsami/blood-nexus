@@ -4,12 +4,12 @@ import { useState } from 'react'
 import { IoInformationCircleOutline, IoSearchOutline } from 'react-icons/io5'
 
 interface PlaceInputProps {
-  input: string
-  setInput: (value: string) => void
   startTransition: (callback: () => void) => void
+  onPlaceSelect: (place: any) => void
 }
 
-const PlaceInput = ({ input, setInput, startTransition }: PlaceInputProps) => {
+const PlaceInput = ({ startTransition, onPlaceSelect }: PlaceInputProps) => {
+  const [input, setInput] = useState('')
   let debounceTimer: NodeJS.Timeout
   let cancelTokenSource: CancelTokenSource | null = null
   const [isFocused, setIsFocused] = useState(false)
@@ -29,7 +29,7 @@ const PlaceInput = ({ input, setInput, startTransition }: PlaceInputProps) => {
         startTransition(async () => {
           try {
             cancelTokenSource = axios.CancelToken.source()
-            const { data } = await axios.get('/api/places', {
+            const { data } = await axios.get('/api/places/suggestions', {
               params: { input: value },
               cancelToken: cancelTokenSource.token
             })
@@ -84,6 +84,7 @@ const PlaceInput = ({ input, setInput, startTransition }: PlaceInputProps) => {
                   setInput(suggestion.description)
                   setSuggestions([])
                   setIsFocused(false)
+                  onPlaceSelect(suggestion.place_id)
                 }}
               >
                 <p className="text-sm text-gray-800">

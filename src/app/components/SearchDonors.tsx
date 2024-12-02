@@ -1,27 +1,60 @@
 'use client'
-import { useState, useTransition } from 'react'
+import { useTransition, useState } from 'react'
 import { FaMapMarkerAlt } from 'react-icons/fa'
 import { IoSearchOutline } from 'react-icons/io5'
 import { CgSpinner } from 'react-icons/cg'
 import PlaceInput from './PlaceInput'
+import { useRouter } from 'next/navigation'
 
 const SearchDonors = () => {
+  const router = useRouter()
   const [isPending, startTransition] = useTransition()
-  const [input, setInput] = useState('')
+  const [selectedPlace, setSelectedPlace] = useState<any>(null)
+  const [error, setError] = useState<string | null>(null)
 
-  const handleSearch = () => {
-    startTransition(() => {
-      console.log('Searching for:', input)
+  const handleSearch = async () => {
+    if (!selectedPlace) {
+      setError('Please select a valid location')
+      return
+    }
+
+    startTransition(async () => {
+      try {
+        const response = await fetch('/api/donations/request', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            placeId: selectedPlace,
+            bloodGroup: 'O_POSITIVE'
+          })
+        })
+
+        const data = await response.json()
+
+        if (!response.ok) {
+          throw new Error(data.error || 'Failed to create request')
+        }
+
+        router.push(`/blood-donation-request?id=${data.requestId}`)
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Something went wrong')
+        console.error('Error:', err)
+      }
     })
+  }
+
+  const handlePlaceSelect = (place: any) => {
+    setSelectedPlace(place)
   }
 
   return (
     <div className="relative">
       <FaMapMarkerAlt className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-xl z-10" />
       <PlaceInput
-        input={input}
-        setInput={setInput}
         startTransition={startTransition}
+        onPlaceSelect={handlePlaceSelect}
       />
       <button
         onClick={handleSearch}
@@ -41,6 +74,7 @@ const SearchDonors = () => {
           </>
         )}
       </button>
+      {error && <p className="text-red-500 mt-2">{error}</p>}
     </div>
   )
 }

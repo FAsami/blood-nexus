@@ -2,6 +2,7 @@
 
 import * as React from 'react'
 import clsx from 'clsx'
+import { BiSolidDonateBlood } from 'react-icons/bi'
 
 interface Option {
   id: string
