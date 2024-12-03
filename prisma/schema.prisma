@@ -2,10 +2,13 @@ generator client {
   provider = "prisma-client-js"
 }
 
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+
 
 model User {
   id            String    @id @default(cuid())
@@ -97,3 +100,17 @@ enum TokenType {
   PHONE_VERIFICATION
 }
 
+
+model Organization {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  slug        String   @unique
+  description String?
+  logoUrl     String?
+  faviconUrl  String?
+  seo         Json?    @default("{}")
+  theme       Json?    @default("{}")
+  settings    Json?    @default("{}")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
