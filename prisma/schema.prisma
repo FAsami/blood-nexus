@@ -9,7 +9,7 @@ datasource db {
 
 model User {
   id            String    @id @default(cuid())
-  name          String?
+  name          String
   email         String?   @unique
   emailVerified DateTime?
   phone         String?   @unique
@@ -18,6 +18,21 @@ model User {
   image         String?
   accounts      Account[]
   sessions      Session[]
+  tokens        Token[]
+  userRoles     UserRole[]
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Token {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String
+  type      TokenType @default(OTP)
+  createdAt DateTime @default(now())
+  expiresAt DateTime @default(dbgenerated("NOW() + interval '15 minutes'"))
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Account {
@@ -53,5 +68,32 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+model Role {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?
+  userRoles   UserRole[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model UserRole {
+  id        String   @id @default(cuid())
+  userId    String
+  roleId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role      Role     @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, roleId])
+}
+
+enum TokenType {
+  OTP
+  RESET_PASSWORD
+  EMAIL_VERIFICATION
+  PHONE_VERIFICATION
 }
 
