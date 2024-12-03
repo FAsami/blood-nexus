@@ -3,7 +3,6 @@ import axios from 'axios'
 
 export async function POST(request: Request) {
   const { gRecaptchaToken } = await request.json()
-  console.log('[CAPTCHA TOKEN]', gRecaptchaToken)
 
   try {
     const res = await axios.post(
