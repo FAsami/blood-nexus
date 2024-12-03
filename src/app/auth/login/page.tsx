@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { Suspense, useState, useTransition } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { LoginInput, LoginSchema } from '@/schema/auth'
@@ -13,7 +13,7 @@ import { loginUser } from '../actions/loginUser'
 import { useReCaptcha } from '@/hooks/useRecaptcha'
 import { useSearchParams } from 'next/dist/client/components/navigation'
 
-const LoginPage = () => {
+const LoginPageContent = () => {
   const [error, setError] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
   const { verifyReCaptcha } = useReCaptcha()
@@ -53,6 +53,7 @@ const LoginPage = () => {
           setError(result?.error ?? 'Failed to login. Please try again.')
         }
       } catch (err) {
+        console.error(err)
         setError('Failed to login. Please try again.')
       }
     })
@@ -165,6 +166,14 @@ const LoginPage = () => {
         </div>
       </Paper>
     </Box>
+  )
+}
+
+const LoginPage = () => {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <LoginPageContent />
+    </Suspense>
   )
 }
 

@@ -14,7 +14,6 @@ import {
   FaBars,
   FaTimes
 } from 'react-icons/fa'
-import { BloodtypeSharp } from '@mui/icons-material'
 import { useSession, signIn, signOut } from 'next-auth/react'
 import { Button, Menu, MenuItem, Avatar } from '@mui/material'
 import { Person as PersonIcon } from '@mui/icons-material'
@@ -25,23 +24,21 @@ const Header = () => {
   const [lastScrollY, setLastScrollY] = useState(0)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
-  const { data: session, status } = useSession()
+  const { data: session } = useSession()
   const router = useRouter()
-
-  const controlHeader = () => {
-    if (typeof window !== 'undefined') {
-      const currentScrollY = window.scrollY
-      if (currentScrollY > lastScrollY) {
-        setIsVisible(false)
-      } else {
-        setIsVisible(true)
-      }
-      setLastScrollY(currentScrollY)
-    }
-  }
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
+      const controlHeader = () => {
+        const currentScrollY = window.scrollY
+        if (currentScrollY > lastScrollY) {
+          setIsVisible(false)
+        } else {
+          setIsVisible(true)
+        }
+        setLastScrollY(currentScrollY)
+      }
+
       window.addEventListener('scroll', controlHeader)
       return () => {
         window.removeEventListener('scroll', controlHeader)

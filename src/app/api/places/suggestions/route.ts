@@ -36,6 +36,7 @@ export async function GET(request: Request) {
     }
     return responseData
   } catch (error) {
+    console.error(error)
     return NextResponse.json(
       { error: 'Failed to fetch places' },
       { status: 500 }

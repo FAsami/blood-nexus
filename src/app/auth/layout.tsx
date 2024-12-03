@@ -1,6 +1,3 @@
-import Image from 'next/image'
-import { FcGoogle } from 'react-icons/fc'
-
 const AuthLayout = async ({
   children
 }: Readonly<{

@@ -9,7 +9,7 @@ import { useRouter } from 'next/navigation'
 const SearchDonors = () => {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
-  const [selectedPlace, setSelectedPlace] = useState<any>(null)
+  const [selectedPlace, setSelectedPlace] = useState<unknown>(null)
   const [error, setError] = useState<string | null>(null)
 
   const handleSearch = async () => {
@@ -45,7 +45,7 @@ const SearchDonors = () => {
     })
   }
 
-  const handlePlaceSelect = (place: any) => {
+  const handlePlaceSelect = (place: unknown) => {
     setSelectedPlace(place)
   }
 

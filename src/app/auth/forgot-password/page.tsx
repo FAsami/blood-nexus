@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { Suspense, useState, useTransition } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { SendTokenInput, SendTokenSchema } from '@/schema/auth'
@@ -13,7 +13,7 @@ import { forgotPassword } from '../actions/forgotPassword'
 import { useReCaptcha } from '@/hooks/useRecaptcha'
 import { useSearchParams } from 'next/navigation'
 
-const ForgotPasswordPage = () => {
+const ForgotPasswordPageContent = () => {
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
@@ -51,6 +51,7 @@ const ForgotPasswordPage = () => {
           )
         }
       } catch (err) {
+        console.error(err)
         setError('Failed to process request. Please try again.')
       }
     })
@@ -142,6 +143,14 @@ const ForgotPasswordPage = () => {
         </form>
       </Paper>
     </Box>
+  )
+}
+
+const ForgotPasswordPage = () => {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <ForgotPasswordPageContent />
+    </Suspense>
   )
 }
 

@@ -21,7 +21,6 @@ interface VerifyOTPFormProps {
 }
 
 const VerifyOTPForm: React.FC<VerifyOTPFormProps> = ({
-  name,
   phone,
   email,
   scope
@@ -63,6 +62,7 @@ const VerifyOTPForm: React.FC<VerifyOTPFormProps> = ({
           setError(result?.error ?? 'Failed to verify OTP. Please try again.')
         }
       } catch (err) {
+        console.error(err)
         setError('Failed to verify OTP. Please try again.')
       }
     })
@@ -85,6 +85,7 @@ const VerifyOTPForm: React.FC<VerifyOTPFormProps> = ({
           setError(result?.error ?? 'Failed to resend OTP. Please try again.')
         }
       } catch (err) {
+        console.error(err)
         setError('Failed to resend OTP. Please try again.')
       }
     })

@@ -2,10 +2,11 @@
 import axios, { CancelTokenSource } from 'axios'
 import { useState } from 'react'
 import { IoInformationCircleOutline, IoSearchOutline } from 'react-icons/io5'
+/// <reference types="google.maps" />
 
 interface PlaceInputProps {
   startTransition: (callback: () => void) => void
-  onPlaceSelect: (place: any) => void
+  onPlaceSelect: (place: google.maps.places.AutocompletePrediction) => void
 }
 
 const PlaceInput = ({ startTransition, onPlaceSelect }: PlaceInputProps) => {
@@ -13,7 +14,9 @@ const PlaceInput = ({ startTransition, onPlaceSelect }: PlaceInputProps) => {
   let debounceTimer: NodeJS.Timeout
   let cancelTokenSource: CancelTokenSource | null = null
   const [isFocused, setIsFocused] = useState(false)
-  const [suggestions, setSuggestions] = useState<any[]>([])
+  const [suggestions, setSuggestions] = useState<
+    google.maps.places.AutocompletePrediction[]
+  >([])
 
   const handleInputChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value
@@ -76,7 +79,7 @@ const PlaceInput = ({ startTransition, onPlaceSelect }: PlaceInputProps) => {
       {isFocused && (
         <div className="absolute z-10 w-full mt-1 bg-white rounded-lg shadow-lg border border-gray-200 max-h-60 overflow-y-auto">
           {suggestions.length > 0 ? (
-            suggestions.map((suggestion, index) => (
+            suggestions.map((suggestion) => (
               <div
                 key={suggestion.place_id}
                 className="p-3 hover:bg-gray-100 cursor-pointer"
@@ -84,7 +87,7 @@ const PlaceInput = ({ startTransition, onPlaceSelect }: PlaceInputProps) => {
                   setInput(suggestion.description)
                   setSuggestions([])
                   setIsFocused(false)
-                  onPlaceSelect(suggestion.place_id)
+                  onPlaceSelect(suggestion)
                 }}
               >
                 <p className="text-sm text-gray-800">

@@ -8,7 +8,7 @@ import { revalidatePath } from 'next/cache'
 
 const verifyOTP: AuthAction<typeof VerifyOTPSchema> = async (
   values,
-  { callbackUrl, token }
+  { callbackUrl }
 ) => {
   let isVerified = false
   let isPasswordReset = false

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { Suspense, useState, useTransition } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { RegisterInput, RegisterSchema } from '@/schema/auth'
@@ -12,17 +12,14 @@ import Link from 'next/link'
 import { registerUser } from '../actions/registerUser'
 import { useReCaptcha } from '@/hooks/useRecaptcha'
 import { useSearchParams } from 'next/navigation'
-import { useSession } from 'next-auth/react'
 
-const RegisterPage = () => {
+const RegisterPageContent = () => {
   const [error, setError] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
   const { verifyReCaptcha } = useReCaptcha()
   const searchParams = useSearchParams()
   const callbackUrl = searchParams.get('callbackUrl') ?? '/'
   const token = searchParams.get('token') ?? ''
-  const session = useSession()
-  console.log(session)
 
   const {
     control,
@@ -55,6 +52,7 @@ const RegisterPage = () => {
           setError(result?.error ?? 'Failed to register. Please try again.')
         }
       } catch (err) {
+        console.error(err)
         setError('Failed to register. Please try again.')
       }
     })
@@ -209,6 +207,14 @@ const RegisterPage = () => {
         </form>
       </Paper>
     </Box>
+  )
+}
+
+const RegisterPage = () => {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <RegisterPageContent />
+    </Suspense>
   )
 }
 

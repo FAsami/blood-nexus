@@ -44,6 +44,7 @@ export async function GET(request: Request) {
 
     return responseData
   } catch (error) {
+    console.error(error)
     return NextResponse.json(
       { error: 'Failed to fetch place details' },
       { status: 500 }

@@ -1,10 +1,4 @@
-import {
-  Inter,
-  Montserrat,
-  Noto_Sans_Bengali,
-  Poppins,
-  Roboto
-} from 'next/font/google'
+import { Montserrat, Noto_Sans_Bengali } from 'next/font/google'
 
 const primary = Montserrat({
   weight: ['400', '700', '500', '900'],
