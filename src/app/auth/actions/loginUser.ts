@@ -6,6 +6,7 @@ import { AuthAction } from '@/types/auth-form'
 import { redirect } from 'next/navigation'
 import { isValidUrl } from '@/utils/isValidUrl'
 import bcrypt from 'bcryptjs'
+import { revalidatePath } from 'next/cache'
 
 const loginUser: AuthAction<typeof LoginSchema> = async (
   values,
@@ -42,8 +43,9 @@ const loginUser: AuthAction<typeof LoginSchema> = async (
         password,
         redirect: false
       })
-      console.log(res)
       isLoggedIn = isValidUrl(res)
+
+      revalidatePath('/', 'layout')
     } else {
       return {
         success: false,
