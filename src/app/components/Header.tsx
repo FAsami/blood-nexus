@@ -124,7 +124,7 @@ const Header = () => {
                 className="h-8 md:h-12 w-auto"
               />
               <span className="text-lg md:text-xl font-medium text-red-500 font-bengali hidden sm:block">
-                <BloodtypeSharp fontSize="large" color="primary" /> Roktodan
+                Roktodan
               </span>
             </Link>
 
