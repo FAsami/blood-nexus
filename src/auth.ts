@@ -1,9 +1,7 @@
 import bcrypt from 'bcryptjs'
 import type { NextAuthConfig } from 'next-auth'
 import NextAuth from 'next-auth'
-import { encode as jwtEncode } from 'next-auth/jwt'
 import Credentials from 'next-auth/providers/credentials'
-import { v4 as uuid } from 'uuid'
 import { PrismaAdapter } from '@auth/prisma-adapter'
 import Google from 'next-auth/providers/google'
 import { getUser } from './query/user'
@@ -80,7 +78,7 @@ const authConfig: NextAuthConfig = {
     })
   ],
   callbacks: {
-    async jwt({ token, account }) {
+    async jwt({ token, account, user }) {
       if (
         account?.provider === 'email_password' ||
         account?.provider === 'phone_password' ||
@@ -88,28 +86,31 @@ const authConfig: NextAuthConfig = {
       ) {
         token.credentials = true
       }
+      if (user && user.id) {
+        token.id = user.id
+        const userWithRoles = await prismaClient.user.findUnique({
+          where: { id: user.id },
+          include: { userRoles: { include: { role: true } } }
+        })
+        if (userWithRoles?.userRoles) {
+          const roles = userWithRoles.userRoles.map(
+            (userRole) => userRole.role.name
+          )
+          token.roles = roles
+        }
+      }
       return token
+    },
+    async session({ session, token }) {
+      if (token && session.user) {
+        session.user.id = token.id as string
+        session.user.roles = token.roles as string[]
+      }
+      return session
     }
   },
-  jwt: {
-    encode: async function (params) {
-      if (params.token?.credentials) {
-        const sessionToken = uuid()
-        if (!params.token.sub) {
-          throw new Error('No user is associated with this token')
-        }
-        const session = await adapter?.createSession?.({
-          sessionToken: sessionToken,
-          userId: params.token.sub,
-          expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
-        })
-        if (!session) {
-          throw new Error('Something went wrong while trying to create session')
-        }
-        return sessionToken
-      }
-      return jwtEncode(params)
-    }
+  session: {
+    strategy: 'jwt'
   },
   secret: process.env.AUTH_SECRET!
 }

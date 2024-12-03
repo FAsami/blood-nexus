@@ -7,7 +7,7 @@ import Header from './components/Header'
 import { fonts } from './fonts/font'
 import clsx from 'clsx'
 import { ReCaptchaProvider } from './providers/recaptcha'
-
+import { SessionProvider } from 'next-auth/react'
 export const metadata: Metadata = {
   title: 'রক্তদান - রক্তদান প্ল্যাটফর্ম | Roktodan - Blood Donation Platform',
   description:
@@ -24,14 +24,16 @@ const RootLayout = ({ children }: { children: React.ReactNode }) => {
         )}
       >
         <ReCaptchaProvider>
-          <AppRouterCacheProvider>
-            <ThemeProvider theme={theme}>
-              <div className="h-20">
-                <Header />
-              </div>
-              {children}
-            </ThemeProvider>
-          </AppRouterCacheProvider>
+          <SessionProvider>
+            <AppRouterCacheProvider>
+              <ThemeProvider theme={theme}>
+                <div className="h-20">
+                  <Header />
+                </div>
+                {children}
+              </ThemeProvider>
+            </AppRouterCacheProvider>
+          </SessionProvider>
         </ReCaptchaProvider>
       </body>
     </html>
