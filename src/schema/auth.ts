@@ -80,7 +80,12 @@ export const RegisterSchema = z
     password: z
       .string()
       .min(8, 'Password must be at least 8 characters long')
-      .max(64, 'Password should not exceed 64 characters')
+      .max(64, 'Password should not exceed 64 characters'),
+    confirmPassword: z.string()
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: 'Passwords do not match',
+    path: ['confirmPassword']
   })
   .superRefine((data, ctx) => {
     if (!data.email && !data.phone) {
@@ -96,6 +101,7 @@ export const RegisterSchema = z
       })
     }
   })
+export type RegisterInput = z.infer<typeof RegisterSchema>
 
 export const VerifyOTPSchema = z
   .object({
@@ -140,7 +146,9 @@ export const VerifyOTPSchema = z
     }
   })
 
-export const SendOTPSchema = z
+export type VerifyOTPInput = z.infer<typeof VerifyOTPSchema>
+
+export const SendTokenSchema = z
   .object({
     phone: z
       .string()
@@ -163,7 +171,13 @@ export const SendOTPSchema = z
         {
           message: 'Invalid email'
         }
-      )
+      ),
+    type: z.enum([
+      'OTP',
+      'FORGOT_PASSWORD',
+      'EMAIL_VERIFICATION',
+      'PHONE_VERIFICATION'
+    ])
   })
   .superRefine((data, ctx) => {
     if (!data.email && !data.phone) {
@@ -180,6 +194,8 @@ export const SendOTPSchema = z
     }
   })
 
+export type SendTokenInput = z.infer<typeof SendTokenSchema>
+
 export const ResetPasswordSchema = z
   .object({
     password: z
@@ -193,6 +209,8 @@ export const ResetPasswordSchema = z
     message: 'Passwords do not match',
     path: ['confirmPassword']
   })
+
+export type ResetPasswordInput = z.infer<typeof ResetPasswordSchema>
 
 export const ChangePasswordSchema = z
   .object({
@@ -210,3 +228,5 @@ export const ChangePasswordSchema = z
     message: 'Passwords do not match',
     path: ['confirmPassword']
   })
+
+export type ChangePasswordInput = z.infer<typeof ChangePasswordSchema>
