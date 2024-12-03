@@ -15,11 +15,18 @@ import {
   FaTimes
 } from 'react-icons/fa'
 import { BloodtypeSharp } from '@mui/icons-material'
+import { useSession, signIn, signOut } from 'next-auth/react'
+import { Button, Menu, MenuItem, Avatar } from '@mui/material'
+import { Person as PersonIcon } from '@mui/icons-material'
+import { useRouter } from 'next/navigation'
 
 const Header = () => {
   const [isVisible, setIsVisible] = useState(true)
   const [lastScrollY, setLastScrollY] = useState(0)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
+  const { data: session, status } = useSession()
+  const router = useRouter()
 
   const controlHeader = () => {
     if (typeof window !== 'undefined') {
@@ -41,6 +48,19 @@ const Header = () => {
       }
     }
   }, [lastScrollY])
+
+  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget)
+  }
+
+  const handleMenuClose = () => {
+    setAnchorEl(null)
+  }
+
+  const handleLogout = () => {
+    handleMenuClose()
+    signOut()
+  }
 
   return (
     <header
@@ -133,15 +153,126 @@ const Header = () => {
               >
                 Contact
               </Link>
+
               <Link
                 href="/donate"
-                className="bg-red-500 text-white px-5 py-2 rounded-full hover:bg-red-700 transition-colors font-medium text-sm md:text-base"
+                className="bg-red-500 text-white px-5 py-2 whitespace-nowrap rounded-full hover:bg-red-700 transition-colors font-medium text-sm md:text-base"
               >
                 Donate Blood
               </Link>
+              <div className="w-[120px] ">
+                {session ? (
+                  <Button
+                    onClick={handleMenuOpen}
+                    startIcon={
+                      session.user?.image ? (
+                        <Avatar
+                          src={session.user.image}
+                          sx={{ width: 24, height: 24 }}
+                        />
+                      ) : (
+                        <PersonIcon />
+                      )
+                    }
+                    className="text-gray-700 hover:text-red-500 font-medium text-sm md:text-base normal-case w-full truncate"
+                  >
+                    <span className="truncate">
+                      {session.user?.name || 'Account'}
+                    </span>
+                  </Button>
+                ) : (
+                  <Button
+                    onClick={() => signIn()}
+                    startIcon={<PersonIcon />}
+                    className="text-gray-700 hover:text-red-500 font-medium text-sm md:text-base normal-case w-full"
+                  >
+                    Login
+                  </Button>
+                )}
+                <Menu
+                  anchorEl={anchorEl}
+                  open={Boolean(anchorEl)}
+                  onClose={handleMenuClose}
+                  anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'right'
+                  }}
+                  transformOrigin={{
+                    vertical: 'top',
+                    horizontal: 'right'
+                  }}
+                >
+                  <MenuItem
+                    onClick={() => {
+                      handleMenuClose()
+                      router.push('/profile')
+                    }}
+                  >
+                    Profile
+                  </MenuItem>
+                  <MenuItem onClick={handleLogout}>
+                    <span className="text-red-500">Logout</span>
+                  </MenuItem>
+                </Menu>
+              </div>
             </div>
 
-            <div className="flex items-center space-x-2 md:hidden">
+            <div className="flex  overflow-hidden items-center space-x-2 md:hidden">
+              <div className="w-[120px] flex-shrink-0">
+                {session ? (
+                  <Button
+                    onClick={handleMenuOpen}
+                    startIcon={
+                      session.user?.image ? (
+                        <Avatar
+                          src={session.user.image}
+                          sx={{ width: 20, height: 20 }}
+                        />
+                      ) : (
+                        <PersonIcon className="h-5 w-5" />
+                      )
+                    }
+                    className="text-gray-700 hover:text-red-500 font-medium text-sm normal-case p-0 w-full truncate"
+                  >
+                    <span className="truncate">
+                      {session.user?.name || 'Profile'}
+                    </span>
+                  </Button>
+                ) : (
+                  <Button
+                    onClick={() => signIn()}
+                    startIcon={<PersonIcon className="h-5 w-5" />}
+                    className="text-gray-700 hover:text-red-500 font-medium text-sm normal-case p-0 w-full"
+                  >
+                    Login
+                  </Button>
+                )}
+                <Menu
+                  anchorEl={anchorEl}
+                  open={Boolean(anchorEl)}
+                  onClose={handleMenuClose}
+                  anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'right'
+                  }}
+                  transformOrigin={{
+                    vertical: 'top',
+                    horizontal: 'right'
+                  }}
+                >
+                  <MenuItem
+                    onClick={() => {
+                      handleMenuClose()
+                      router.push('/profile')
+                    }}
+                  >
+                    Account
+                  </MenuItem>
+                  <MenuItem onClick={handleLogout}>
+                    <span className="text-red-500">Logout</span>
+                  </MenuItem>
+                </Menu>
+              </div>
               <Link
                 href="/donate"
                 className="bg-red-500 text-white px-3 py-1.5 rounded-full hover:bg-red-700 transition-colors font-medium text-sm"
@@ -153,9 +284,9 @@ const Header = () => {
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
               >
                 {isMenuOpen ? (
-                  <FaTimes className="h-5 w-5" />
+                  <FaTimes className="h-5 w-5 text-red-400" />
                 ) : (
-                  <FaBars className="h-5 w-5" />
+                  <FaBars className="h-5 w-5 text-red-400" />
                 )}
               </button>
             </div>
