@@ -1,12 +1,11 @@
 'use client'
-
 import { Suspense, useState, useTransition } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { LoginInput, LoginSchema } from '@/schema/auth'
 import { Box, Paper, Typography, Button, Alert } from '@mui/material'
 import { TextFieldElement } from 'react-hook-form-mui'
-import { Email, Phone, Lock, BloodtypeSharp } from '@mui/icons-material'
+import { Phone, Lock, BloodtypeSharp } from '@mui/icons-material'
 import { InputAdornment } from '@mui/material'
 import Link from 'next/link'
 import { loginUser } from '../actions/loginUser'
@@ -29,7 +28,7 @@ const LoginPageContent = () => {
     resolver: zodResolver(LoginSchema),
     defaultValues: {
       email: '',
-      phone: '',
+      phone: '+880',
       password: ''
     }
   })
@@ -40,7 +39,6 @@ const LoginPageContent = () => {
     startTransition(async () => {
       try {
         const isVerified = await verifyReCaptcha('login')
-        console.log('[IS VERIFIED]', isVerified)
         if (!isVerified) {
           setError('Failed to verify reCAPTCHA. Please try again.')
           return
@@ -66,7 +64,7 @@ const LoginPageContent = () => {
           <BloodtypeSharp fontSize="small" color="primary" /> Login to continue
         </Typography>
         <Typography variant="body2" component="p" className="text-center pb-2">
-          Already have an account?{' '}
+          Don&apos;t have an account?{' '}
           <Link href="/auth/register" className="text-red-500">
             Sign up
           </Link>
@@ -79,28 +77,6 @@ const LoginPageContent = () => {
         )}
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          <TextFieldElement
-            name="email"
-            control={control}
-            label="Email"
-            type="email"
-            fullWidth
-            placeholder="Enter your email address"
-            helperText={errors.email?.message}
-            slotProps={{
-              input: {
-                style: {
-                  fontSize: '14px'
-                },
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <Email color="primary" fontSize="small" />
-                  </InputAdornment>
-                )
-              }
-            }}
-          />
-
           <TextFieldElement
             name="phone"
             control={control}

@@ -31,7 +31,7 @@ const RegisterPageContent = () => {
       firstName: '',
       lastName: '',
       email: '',
-      phone: '',
+      phone: '+880',
       password: '',
       confirmPassword: ''
     }

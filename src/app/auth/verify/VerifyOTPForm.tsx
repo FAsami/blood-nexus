@@ -3,7 +3,7 @@
 import { useState, useTransition } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { VerifyOTPInput, VerifyOTPSchema } from '@/schema/auth'
+import { TokenType, VerifyOTPInput, VerifyOTPSchema } from '@/schema/auth'
 import { Box, Paper, Typography, Button, Alert } from '@mui/material'
 import { TextFieldElement } from 'react-hook-form-mui'
 import { LockReset } from '@mui/icons-material'
@@ -12,12 +12,13 @@ import { verifyOTP } from '../actions/verifyOTP'
 import { useReCaptcha } from '@/hooks/useRecaptcha'
 import { useSearchParams } from 'next/navigation'
 import { sendToken } from '../actions/sendToken'
+import { z } from 'zod'
 
 interface VerifyOTPFormProps {
   name: string
   phone: string
   email: string
-  scope: 'FORGOT_PASSWORD' | 'REGISTER'
+  scope: z.infer<typeof TokenType>
 }
 
 const VerifyOTPForm: React.FC<VerifyOTPFormProps> = ({
@@ -42,7 +43,8 @@ const VerifyOTPForm: React.FC<VerifyOTPFormProps> = ({
     defaultValues: {
       email: email || undefined,
       phone: phone || undefined,
-      otp: ''
+      otp: '',
+      type: scope
     }
   })
 
@@ -77,7 +79,10 @@ const VerifyOTPForm: React.FC<VerifyOTPFormProps> = ({
         const result = await sendToken({
           email,
           phone,
-          type: scope === 'FORGOT_PASSWORD' ? 'FORGOT_PASSWORD' : 'OTP'
+          type:
+            scope === TokenType.Enum.RESET_PASSWORD
+              ? TokenType.Enum.RESET_PASSWORD
+              : TokenType.Enum.OTP
         })
         if (result.success) {
           setMessage(result?.message ?? 'OTP sent successfully!')

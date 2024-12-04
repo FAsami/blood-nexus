@@ -73,8 +73,6 @@ const VerifyPage = async ({
       </div>
     )
   }
-  console.log('DECODED', decoded)
-
   return (
     <VerifyOTPForm
       name={decoded.name || ''}

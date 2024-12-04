@@ -6,7 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { SendTokenInput, SendTokenSchema } from '@/schema/auth'
 import { Box, Paper, Typography, Button, Alert } from '@mui/material'
 import { TextFieldElement } from 'react-hook-form-mui'
-import { Email, Phone, LockReset } from '@mui/icons-material'
+import { Phone, LockReset } from '@mui/icons-material'
 import { InputAdornment } from '@mui/material'
 import Link from 'next/link'
 import { forgotPassword } from '../actions/forgotPassword'
@@ -29,11 +29,13 @@ const ForgotPasswordPageContent = () => {
     resolver: zodResolver(SendTokenSchema),
     defaultValues: {
       email: '',
-      phone: ''
+      phone: '+880',
+      type: 'OTP'
     }
   })
 
   const onSubmit = async (data: SendTokenInput) => {
+    console.log('DATA', data)
     setError(null)
     setSuccess(null)
 
@@ -64,7 +66,7 @@ const ForgotPasswordPageContent = () => {
           <LockReset fontSize="small" color="primary" /> Forgot Password
         </Typography>
         <Typography variant="body2" component="p" className="text-center pb-2">
-          Enter your email or phone number to reset your password
+          Enter your phone number to reset your password
         </Typography>
 
         {error && (
@@ -80,30 +82,6 @@ const ForgotPasswordPageContent = () => {
         )}
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          <TextFieldElement
-            name="email"
-            control={control}
-            label="Email"
-            type="email"
-            fullWidth
-            placeholder="Enter your email address"
-            helperText={errors.email?.message}
-            slotProps={{
-              input: {
-                style: { fontSize: '14px' },
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <Email color="primary" fontSize="small" />
-                  </InputAdornment>
-                )
-              }
-            }}
-          />
-
-          <Typography variant="body2" className="text-center">
-            OR
-          </Typography>
-
           <TextFieldElement
             name="phone"
             control={control}
