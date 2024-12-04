@@ -3,7 +3,7 @@ import { ThemeProvider } from '@mui/material/styles'
 import theme from '../theme'
 import type { Metadata } from 'next'
 import './globals.css'
-import Header from './components/Header'
+import Header from './components/header'
 import { fonts } from './fonts/font'
 import clsx from 'clsx'
 import { ReCaptchaProvider } from './providers/recaptcha'
@@ -28,7 +28,7 @@ const RootLayout = ({ children }: { children: React.ReactNode }) => {
             <AppRouterCacheProvider>
               <ThemeProvider theme={theme}>
                 <Header />
-                {children}
+                <main>{children}</main>
               </ThemeProvider>
             </AppRouterCacheProvider>
           </SessionProvider>
