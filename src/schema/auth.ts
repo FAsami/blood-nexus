@@ -1,6 +1,13 @@
 import { parsePhoneNumberFromString } from 'libphonenumber-js'
 import * as z from 'zod'
 
+export const TokenType = z.enum([
+  'OTP',
+  'RESET_PASSWORD',
+  'EMAIL_VERIFICATION',
+  'PHONE_VERIFICATION'
+])
+
 export const LoginSchema = z
   .object({
     phone: z
@@ -34,12 +41,12 @@ export const LoginSchema = z
     if (!data.email && !data.phone) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: 'Either email or phone number is required',
+        message: 'Phone number is required',
         path: ['email']
       })
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: 'Either email or phone number is required',
+        message: 'Phone number is required',
         path: ['phone']
       })
     }
@@ -129,7 +136,8 @@ export const VerifyOTPSchema = z
       ),
     otp: z.string().length(6, {
       message: 'OTP must be exactly 6 digits'
-    })
+    }),
+    type: TokenType
   })
   .superRefine((data, ctx) => {
     if (!data.email && !data.phone) {
@@ -172,12 +180,7 @@ export const SendTokenSchema = z
           message: 'Invalid email'
         }
       ),
-    type: z.enum([
-      'OTP',
-      'FORGOT_PASSWORD',
-      'EMAIL_VERIFICATION',
-      'PHONE_VERIFICATION'
-    ])
+    type: TokenType
   })
   .superRefine((data, ctx) => {
     if (!data.email && !data.phone) {
@@ -202,8 +205,7 @@ export const ResetPasswordSchema = z
       .string()
       .min(8, 'Password must be at least 8 characters long')
       .max(64, 'Password should not exceed 64 characters'),
-    confirmPassword: z.string(),
-    token: z.string()
+    confirmPassword: z.string()
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: 'Passwords do not match',
