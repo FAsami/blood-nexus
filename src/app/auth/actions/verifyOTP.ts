@@ -1,10 +1,11 @@
 'use server'
 
 import { prismaClient } from '@/lib/prismaClient'
-import { VerifyOTPSchema } from '@/schema/auth'
+import { TokenType, VerifyOTPSchema } from '@/schema/auth'
 import { AuthAction } from '@/types/auth-form'
 import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
+import { signIn } from '@/auth'
 
 const verifyOTP: AuthAction<typeof VerifyOTPSchema> = async (
   values,
@@ -19,7 +20,7 @@ const verifyOTP: AuthAction<typeof VerifyOTPSchema> = async (
       return { success: false, error: 'Invalid fields!' }
     }
 
-    const { otp, email, phone } = validatedFields.data
+    const { otp, email, phone, type } = validatedFields.data
 
     const user = await prismaClient.user.findFirst({
       where: {
@@ -34,7 +35,7 @@ const verifyOTP: AuthAction<typeof VerifyOTPSchema> = async (
     const latestToken = await prismaClient.token.findFirst({
       where: {
         userId: user.id,
-        type: 'OTP',
+        type,
         token: otp
       },
       orderBy: { createdAt: 'desc' }
@@ -55,7 +56,7 @@ const verifyOTP: AuthAction<typeof VerifyOTPSchema> = async (
       (await prismaClient.token.findFirst({
         where: {
           userId: user.id,
-          type: 'RESET_PASSWORD',
+          type: TokenType.Enum.RESET_PASSWORD,
           expiresAt: { gt: new Date() }
         }
       })) !== null
@@ -68,6 +69,17 @@ const verifyOTP: AuthAction<typeof VerifyOTPSchema> = async (
     await prismaClient.token.delete({
       where: { id: latestToken.id }
     })
+    if (user.phone) {
+      await signIn('verify_otp', {
+        phone,
+        redirect: false
+      })
+    } else if (user.email) {
+      await signIn('verify_otp', {
+        email,
+        redirect: false
+      })
+    }
 
     isVerified = true
   } catch (error) {
@@ -80,7 +92,6 @@ const verifyOTP: AuthAction<typeof VerifyOTPSchema> = async (
 
   if (isVerified) {
     revalidatePath('/', 'layout')
-    // Redirect to set-password page if this is a password reset flow
     if (isPasswordReset) {
       redirect('/auth/set-password')
     }
