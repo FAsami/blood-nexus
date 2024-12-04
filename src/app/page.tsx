@@ -1,8 +1,6 @@
 'use client'
 import { useState } from 'react'
 import { RadioButton } from './components/RadioButton'
-import { MdBloodtype } from 'react-icons/md'
-import { BiSolidDonateBlood } from 'react-icons/bi'
 import { SearchDonors } from './components/SearchDonors'
 
 const Home = () => {
@@ -14,14 +12,17 @@ const Home = () => {
 
   return (
     <div className="min-h-screen relative bg-gradient-to-b from-white to-gray-50 overflow-hidden">
-      <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[150px] md:w-[300px] h-[150px] md:h-[300px] rounded-full bg-gradient-to-r from-red-500/30 to-transparent blur-3xl" />
-      <div className="absolute right-0 top-1/2 -translate-y-1/2 w-[150px] md:w-[300px] h-[150px] md:h-[300px] rounded-full bg-gradient-to-l from-red-500/30 to-transparent blur-3xl" />
-      <div className="absolute top-32 md:top-48 left-8 md:left-20 text-red-500/10 rotate-12">
-        <BiSolidDonateBlood className="text-[80px] md:text-[120px]" />
-      </div>
-      <div className="absolute top-28 md:top-40 right-8 md:right-32 text-red-500/10 -rotate-12">
-        <MdBloodtype className="text-[60px] md:text-[100px]" />
-      </div>
+      <div
+        className="absolute inset-0 z-0"
+        style={{
+          backgroundImage: 'url("/home-bg.jpeg")',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          opacity: 0.7
+        }}
+      />
+      <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[150px] md:w-[300px] h-[150px] md:h-[300px] rounded-full bg-gradient-to-r from-red-500/30 to-transparent blur-3xl z-[1]" />
+      <div className="absolute right-0 top-1/2 -translate-y-1/2 w-[150px] md:w-[300px] h-[150px] md:h-[300px] rounded-full bg-gradient-to-l from-red-500/30 to-transparent blur-3xl z-[1]" />
 
       <div className="container mx-auto px-4 pt-56 relative z-10">
         <div className="max-w-2xl mx-auto space-y-4 md:space-y-6">
@@ -59,7 +60,7 @@ const Home = () => {
         >
           <path
             fill="#EF4444"
-            fillOpacity="0.15"
+            fillOpacity="0.3"
             d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,112C672,96,768,96,864,112C960,128,1056,160,1152,160C1248,160,1344,128,1392,112L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"
           >
             <animate
