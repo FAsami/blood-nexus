@@ -2,14 +2,13 @@
 
 import bcrypt from 'bcryptjs'
 import { signIn } from '@/auth'
-import { RegisterSchema } from '@/schema/auth'
+import { RegisterSchema, TokenType } from '@/schema/auth'
 import { AuthAction } from '@/types/auth-form'
 import { prismaClient } from '@/lib/prismaClient'
 import { isEmpty } from 'lodash'
 import { redirect } from 'next/navigation'
 import { encrypt } from '@/utils/crypto'
 import { sendToken } from './sendToken'
-import { revalidatePath } from 'next/cache'
 
 const registerUser: AuthAction<typeof RegisterSchema> = async (
   values,
@@ -61,7 +60,6 @@ const registerUser: AuthAction<typeof RegisterSchema> = async (
     })
 
     if (user) {
-      // Sign in the user
       if (user.phone) {
         await signIn('phone_password', {
           phone,
@@ -76,16 +74,22 @@ const registerUser: AuthAction<typeof RegisterSchema> = async (
         })
       }
 
-      // Generate token for verification
       token = await encrypt({
         email: user.email,
         phone: user.phone,
         name: user.name,
-        scope: 'REGISTER'
+        scope: user.phone
+          ? TokenType.Enum.PHONE_VERIFICATION
+          : TokenType.Enum.EMAIL_VERIFICATION
       })
 
-      // Send OTP
-      await sendToken({ email, phone, type: 'OTP' })
+      await sendToken({
+        email,
+        phone,
+        type: user.phone
+          ? TokenType.Enum.PHONE_VERIFICATION
+          : TokenType.Enum.EMAIL_VERIFICATION
+      })
     }
   } catch (error) {
     console.error(error)
@@ -100,7 +104,6 @@ const registerUser: AuthAction<typeof RegisterSchema> = async (
    * Token will be populated if authentication and user creating is successful and then we will redirect
    * */
   if (!isEmpty(token)) {
-    revalidatePath('/')
     redirect(
       `/auth/verify?token=${encodeURIComponent(
         token

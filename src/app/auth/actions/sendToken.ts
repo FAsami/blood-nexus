@@ -22,7 +22,7 @@ const sendToken: SendTokenAction = async (values) => {
     if (!validatedFields.success) {
       return { success: false, error: 'Invalid fields!' }
     }
-    const { email, phone } = validatedFields.data
+    const { email, phone, type } = validatedFields.data
     const user = await prismaClient.user.findFirst({
       where: {
         OR: [{ email: email || undefined }, { phone: phone || undefined }]
@@ -33,7 +33,7 @@ const sendToken: SendTokenAction = async (values) => {
       const latestToken = await prismaClient.token.findFirst({
         where: {
           userId: user.id,
-          type: 'OTP'
+          type
         },
         orderBy: { createdAt: 'desc' }
       })
@@ -58,7 +58,7 @@ const sendToken: SendTokenAction = async (values) => {
         data: {
           userId: user.id,
           token,
-          type: 'OTP'
+          type
         }
       })
 

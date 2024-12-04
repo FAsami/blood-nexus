@@ -1,6 +1,6 @@
 'use server'
 
-import { SendTokenSchema } from '@/schema/auth'
+import { SendTokenSchema, TokenType } from '@/schema/auth'
 import { AuthAction } from '@/types/auth-form'
 import { prismaClient } from '@/lib/prismaClient'
 import { encrypt } from '@/utils/crypto'
@@ -35,16 +35,18 @@ const forgotPassword: AuthAction<typeof SendTokenSchema> = async (
       }
     }
 
-    // Generate token for verification
     token = await encrypt({
       email: user.email,
       phone: user.phone,
       name: user.name,
-      scope: 'FORGOT_PASSWORD'
+      scope: TokenType.Enum.RESET_PASSWORD
     })
 
-    // Send OTP
-    const result = await sendToken({ email, phone, type: 'FORGOT_PASSWORD' })
+    const result = await sendToken({
+      email,
+      phone,
+      type: TokenType.Enum.RESET_PASSWORD
+    })
     if (!result.success) {
       return result
     }
