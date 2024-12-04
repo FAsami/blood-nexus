@@ -1,68 +1,14 @@
-'use client'
-
-import { useState, useEffect } from 'react'
-import Image from 'next/image'
+import { auth } from '@/auth'
 import Link from 'next/link'
-import clsx from 'clsx'
-import {
-  FaFacebook,
-  FaEnvelope,
-  FaBars,
-  FaTimes,
-  FaWhatsapp
-} from 'react-icons/fa'
-import { useSession, signIn, signOut } from 'next-auth/react'
-import { Button, Menu, MenuItem, Avatar } from '@mui/material'
-import { Person as PersonIcon } from '@mui/icons-material'
-import { useRouter } from 'next/navigation'
+import { FaFacebook, FaWhatsapp } from 'react-icons/fa'
+import { FaEnvelope } from 'react-icons/fa'
+import Image from 'next/image'
+import { Person } from '@mui/icons-material'
 
-const Header = () => {
-  const [isVisible, setIsVisible] = useState(true)
-  const [lastScrollY, setLastScrollY] = useState(0)
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
-  const { data: session } = useSession()
-  const router = useRouter()
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const controlHeader = () => {
-        const currentScrollY = window.scrollY
-        if (currentScrollY > lastScrollY) {
-          setIsVisible(false)
-        } else {
-          setIsVisible(true)
-        }
-        setLastScrollY(currentScrollY)
-      }
-
-      window.addEventListener('scroll', controlHeader)
-      return () => {
-        window.removeEventListener('scroll', controlHeader)
-      }
-    }
-  }, [lastScrollY])
-
-  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget)
-  }
-
-  const handleMenuClose = () => {
-    setAnchorEl(null)
-  }
-
-  const handleLogout = () => {
-    handleMenuClose()
-    signOut()
-  }
-
+const Header = async () => {
+  const session = await auth()
   return (
-    <header
-      className={clsx(
-        'fixed top-0 left-0 right-0 z-50 transition-transform duration-300',
-        isVisible ? 'translate-y-0' : '-translate-y-full'
-      )}
-    >
+    <div className="sticky top-0 z-50">
       <div className="bg-red-500 py-1 md:py-2">
         <div className="container mx-auto px-4">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center text-xs md:text-sm">
@@ -89,7 +35,6 @@ const Header = () => {
           </div>
         </div>
       </div>
-
       <nav className="bg-white relative">
         <div className="container mx-auto px-4">
           <div className="flex justify-between items-center py-2 md:py-4">
@@ -131,181 +76,32 @@ const Header = () => {
               >
                 Contact
               </Link>
-
-              <Link
-                href="/donate"
-                className="bg-red-500 text-white px-5 py-2 whitespace-nowrap rounded-full hover:bg-red-700 transition-colors font-medium text-sm md:text-base"
-              >
-                Donate Blood
-              </Link>
-              <div className="w-[120px] ">
-                {session ? (
-                  <Button
-                    onClick={handleMenuOpen}
-                    startIcon={
-                      session.user?.image ? (
-                        <Avatar
-                          src={session.user.image}
-                          sx={{ width: 24, height: 24 }}
-                        />
-                      ) : (
-                        <PersonIcon />
-                      )
-                    }
-                    className="text-gray-700 hover:text-red-500 font-medium text-sm md:text-base normal-case w-full truncate"
-                  >
-                    <span className="truncate">
-                      {session.user?.name || 'Account'}
-                    </span>
-                  </Button>
-                ) : (
-                  <Button
-                    onClick={() => signIn()}
-                    startIcon={<PersonIcon />}
-                    className="text-gray-700 hover:text-red-500 font-medium text-sm md:text-base normal-case w-full"
-                  >
-                    Login
-                  </Button>
-                )}
-                <Menu
-                  anchorEl={anchorEl}
-                  open={Boolean(anchorEl)}
-                  onClose={handleMenuClose}
-                  anchorOrigin={{
-                    vertical: 'bottom',
-                    horizontal: 'right'
-                  }}
-                  transformOrigin={{
-                    vertical: 'top',
-                    horizontal: 'right'
-                  }}
-                >
-                  <MenuItem
-                    onClick={() => {
-                      handleMenuClose()
-                      router.push('/profile')
-                    }}
-                  >
-                    Profile
-                  </MenuItem>
-                  <MenuItem onClick={handleLogout}>
-                    <span className="text-red-500">Logout</span>
-                  </MenuItem>
-                </Menu>
-              </div>
             </div>
-
-            <div className="flex  overflow-hidden items-center space-x-2 md:hidden">
-              <div className="w-[120px] flex-shrink-0">
-                {session ? (
-                  <Button
-                    onClick={handleMenuOpen}
-                    startIcon={
-                      session.user?.image ? (
-                        <Avatar
-                          src={session.user.image}
-                          sx={{ width: 20, height: 20 }}
-                        />
-                      ) : (
-                        <PersonIcon className="h-5 w-5" />
-                      )
-                    }
-                    className="text-gray-700 hover:text-red-500 font-medium text-sm normal-case p-0 w-full truncate"
+            <div>
+              {session?.user.id ? (
+                <Link href="/account/profile">
+                  <button className="text-red-500 truncate w-24">
+                    <Person sx={{ fontSize: 16 }} />{' '}
+                    {session.user.name?.split(' ')[0]}
+                  </button>
+                </Link>
+              ) : (
+                <div>
+                  <Link
+                    href="/auth/login"
+                    className="flex items-center space-x-1"
                   >
-                    <span className="truncate">
-                      {session.user?.name || 'Profile'}
-                    </span>
-                  </Button>
-                ) : (
-                  <Button
-                    onClick={() => signIn()}
-                    startIcon={<PersonIcon className="h-5 w-5" />}
-                    className="text-gray-700 hover:text-red-500 font-medium text-sm normal-case p-0 w-full"
-                  >
-                    Login
-                  </Button>
-                )}
-                <Menu
-                  anchorEl={anchorEl}
-                  open={Boolean(anchorEl)}
-                  onClose={handleMenuClose}
-                  anchorOrigin={{
-                    vertical: 'bottom',
-                    horizontal: 'right'
-                  }}
-                  transformOrigin={{
-                    vertical: 'top',
-                    horizontal: 'right'
-                  }}
-                >
-                  <MenuItem
-                    onClick={() => {
-                      handleMenuClose()
-                      router.push('/profile')
-                    }}
-                  >
-                    Account
-                  </MenuItem>
-                  <MenuItem onClick={handleLogout}>
-                    <span className="text-red-500">Logout</span>
-                  </MenuItem>
-                </Menu>
-              </div>
-              <Link
-                href="/donate"
-                className="bg-red-500 text-white px-3 py-1.5 rounded-full hover:bg-red-700 transition-colors font-medium text-sm"
-              >
-                Donate Blood
-              </Link>
-              <button
-                className="text-gray-700 p-1"
-                onClick={() => setIsMenuOpen(!isMenuOpen)}
-              >
-                {isMenuOpen ? (
-                  <FaTimes className="h-5 w-5 text-red-400" />
-                ) : (
-                  <FaBars className="h-5 w-5 text-red-400" />
-                )}
-              </button>
-            </div>
-          </div>
-
-          <div
-            className={clsx(
-              'md:hidden absolute top-full left-0 right-0 bg-white transition-all duration-300',
-              isMenuOpen ? 'opacity-100 visible' : 'opacity-0 invisible'
-            )}
-          >
-            <div className="flex flex-col">
-              <Link
-                href="/"
-                className="px-4 py-2.5 text-gray-700 hover:text-red-500 hover:bg-gray-50 text-base"
-              >
-                Home
-              </Link>
-              <Link
-                href="/about"
-                className="px-4 py-2.5 text-gray-700 hover:text-red-500 hover:bg-gray-50 text-base"
-              >
-                About
-              </Link>
-              <Link
-                href="/blog"
-                className="px-4 py-2.5 text-gray-700 hover:text-red-500 hover:bg-gray-50 text-base"
-              >
-                Blog
-              </Link>
-              <Link
-                href="/contact"
-                className="px-4 py-2.5 text-gray-700 hover:text-red-500 hover:bg-gray-50 text-base"
-              >
-                Contact
-              </Link>
+                    <button className="bg-red-500 rounded-full text-white px-4 py-2 font-medium">
+                      Sign in
+                    </button>
+                  </Link>
+                </div>
+              )}
             </div>
           </div>
         </div>
       </nav>
-    </header>
+    </div>
   )
 }
 

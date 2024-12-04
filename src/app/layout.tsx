@@ -27,9 +27,7 @@ const RootLayout = ({ children }: { children: React.ReactNode }) => {
           <SessionProvider>
             <AppRouterCacheProvider>
               <ThemeProvider theme={theme}>
-                <div className="h-20">
-                  <Header />
-                </div>
+                <Header />
                 {children}
               </ThemeProvider>
             </AppRouterCacheProvider>

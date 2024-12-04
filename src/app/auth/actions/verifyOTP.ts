@@ -91,9 +91,11 @@ const verifyOTP: AuthAction<typeof VerifyOTPSchema> = async (
   if (isVerified) {
     revalidatePath('/', 'layout')
     if (isPasswordReset) {
-      redirect(`/auth/set-password?callbackUrl=${callbackUrl}`)
+      redirect(
+        `/auth/set-password?callbackUrl=${encodeURIComponent(callbackUrl)}`
+      )
     }
-    redirect(callbackUrl)
+    redirect(decodeURIComponent(callbackUrl))
   }
 
   return { success: false, error: 'Verification failed!' }
