@@ -35,7 +35,6 @@ const ForgotPasswordPageContent = () => {
   })
 
   const onSubmit = async (data: SendTokenInput) => {
-    console.log('DATA', data)
     setError(null)
     setSuccess(null)
 
