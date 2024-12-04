@@ -1,3 +1,4 @@
+import { Suspense } from 'react'
 import { SearchDonors } from './components/SearchDonors'
 
 const Home = () => {
@@ -17,7 +18,9 @@ const Home = () => {
 
       <div className="container mx-auto px-4 pt-24 md:pt-32 relative z-10">
         <div className="max-w-2xl mx-auto space-y-4 md:space-y-6">
-          <SearchDonors />
+          <Suspense fallback={<div>Loading...</div>}>
+            <SearchDonors />
+          </Suspense>
         </div>
       </div>
 

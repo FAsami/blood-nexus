@@ -35,7 +35,6 @@ const POST = async (
         : null
     }
   })
-  console.log(bloodDonationRequest)
 
   return NextResponse.json(
     createResponse<{ requestId: string }>({
