@@ -1,15 +1,6 @@
-'use client'
-import { useState } from 'react'
-import { RadioButton } from './components/RadioButton'
 import { SearchDonors } from './components/SearchDonors'
 
 const Home = () => {
-  const [selectedBlood, setSelectedBlood] = useState('B+')
-
-  const handleBloodTypeChange = (value: string) => {
-    setSelectedBlood(value)
-  }
-
   return (
     <div className="min-h-screen relative bg-gradient-to-b from-white to-gray-50 overflow-hidden">
       <div
@@ -24,30 +15,8 @@ const Home = () => {
       <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[150px] md:w-[300px] h-[150px] md:h-[300px] rounded-full bg-gradient-to-r from-red-500/30 to-transparent blur-3xl z-[1]" />
       <div className="absolute right-0 top-1/2 -translate-y-1/2 w-[150px] md:w-[300px] h-[150px] md:h-[300px] rounded-full bg-gradient-to-l from-red-500/30 to-transparent blur-3xl z-[1]" />
 
-      <div className="container mx-auto px-4 pt-24 md:pt-56 relative z-10">
+      <div className="container mx-auto px-4 pt-24 md:pt-32 relative z-10">
         <div className="max-w-2xl mx-auto space-y-4 md:space-y-6">
-          <div className="w-full flex flex-col justify-center">
-            <div className="text-neutral-500 text-center font-light text-sm mb-1">
-              Select your Blood group
-            </div>
-            <div className="flex justify-center">
-              <RadioButton
-                options={[
-                  { id: 'B+', label: 'B+' },
-                  { id: 'A+', label: 'A+' },
-                  { id: 'O+', label: 'O+' },
-                  { id: 'AB+', label: 'AB+' },
-                  { id: 'B-', label: 'B-' },
-                  { id: 'A-', label: 'A-' },
-                  { id: 'O-', label: 'O-' },
-                  { id: 'AB-', label: 'AB-' }
-                ]}
-                value={selectedBlood}
-                onChange={handleBloodTypeChange}
-                color="red"
-              />
-            </div>
-          </div>
           <SearchDonors />
         </div>
       </div>

@@ -2,11 +2,10 @@
 import axios, { CancelTokenSource } from 'axios'
 import { useState } from 'react'
 import { IoInformationCircleOutline, IoSearchOutline } from 'react-icons/io5'
-/// <reference types="google.maps" />
 
 interface PlaceInputProps {
   startTransition: (callback: () => void) => void
-  onPlaceSelect: (place: google.maps.places.AutocompletePrediction) => void
+  onPlaceSelect: (place: GooglePlaceSuggestion) => void
 }
 
 const PlaceInput = ({ startTransition, onPlaceSelect }: PlaceInputProps) => {
@@ -14,9 +13,7 @@ const PlaceInput = ({ startTransition, onPlaceSelect }: PlaceInputProps) => {
   let debounceTimer: NodeJS.Timeout
   let cancelTokenSource: CancelTokenSource | null = null
   const [isFocused, setIsFocused] = useState(false)
-  const [suggestions, setSuggestions] = useState<
-    google.maps.places.AutocompletePrediction[]
-  >([])
+  const [suggestions, setSuggestions] = useState<GooglePlaceSuggestion[]>([])
 
   const handleInputChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value

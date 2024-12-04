@@ -1,5 +1,6 @@
 'use client'
 
+import { BloodGroup } from '@prisma/client'
 import clsx from 'clsx'
 
 interface Option {
@@ -7,23 +8,23 @@ interface Option {
   label: string
 }
 
-interface RadioButtonProps {
+interface BloodGroupSelectProps {
   options: Option[]
-  value: string
-  onChange: (value: string) => void
+  value: BloodGroup
+  onChange: (value: BloodGroup) => void
   className?: string
   optionClassName?: string
   color?: 'default' | 'red'
 }
 
-const RadioButton = ({
+const BloodGroupSelect = ({
   options,
   value,
   onChange,
   className,
   optionClassName,
   color = 'default'
-}: RadioButtonProps) => {
+}: BloodGroupSelectProps) => {
   return (
     <div
       className={clsx(
@@ -36,7 +37,7 @@ const RadioButton = ({
       {options.map((option, index) => (
         <button
           key={option.id}
-          onClick={() => onChange(option.id)}
+          onClick={() => onChange(option.id as BloodGroup)}
           role="radio"
           aria-checked={value === option.id}
           className={clsx(
@@ -56,4 +57,4 @@ const RadioButton = ({
   )
 }
 
-export { RadioButton }
+export { BloodGroupSelect }
