@@ -18,9 +18,8 @@ const NavigationMenu = () => {
   }
 
   const menuItems = [
-    { href: '/', label: 'Home' },
     { href: '/about', label: 'About' },
-    { href: '/blog', label: 'Blog' },
+    { href: '/blogs', label: 'Blogs' },
     { href: '/contact', label: 'Contact' }
   ]
 
