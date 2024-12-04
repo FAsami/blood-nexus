@@ -3,7 +3,7 @@ import { SearchDonors } from './components/SearchDonors'
 
 const Home = () => {
   return (
-    <div className="min-h-screen relative bg-gradient-to-b from-white to-gray-50 overflow-hidden">
+    <div className="min-h-[calc(100vh-var(--header-height))] relative bg-gradient-to-b from-white to-gray-50 overflow-hidden">
       <div
         className="absolute inset-0 z-0"
         style={{

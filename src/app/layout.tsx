@@ -28,7 +28,9 @@ const RootLayout = ({ children }: { children: React.ReactNode }) => {
             <AppRouterCacheProvider>
               <ThemeProvider theme={theme}>
                 <Header />
-                <main>{children}</main>
+                <main className="min-h-[calc(100vh-var(--header-height))]">
+                  {children}
+                </main>
               </ThemeProvider>
             </AppRouterCacheProvider>
           </SessionProvider>
