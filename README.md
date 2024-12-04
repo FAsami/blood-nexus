@@ -76,46 +76,6 @@ SMTP_PASSWORD="your-smtp-password"
 
 ```
 
-The application will be available at `http://localhost:3000`
-
-## Project Structure
-
-- `/src/app` - Next.js app router pages and API routes
-- `/src/components` - Reusable React components
-- `/src/auth` - Authentication configuration and utilities
-- `/src/schema` - Zod validation schemas
-- `/src/utils` - Helper functions and utilities
-- `/prisma` - Database schema and migrations
-- `/public` - Static assets
-
-## Available Scripts
-
-- `npm run dev` - Start development server
-- `npm run build` - Build production application
-- `npm run start` - Start production server
-- `npm run lint` - Run ESLint
-- `npm run format` - Format code with Prettier
-- `npm run prisma:seed` - Seed the database
-
-## Contributing
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details
-
-## Acknowledgments
-
-- Next.js team for the amazing framework
-- Prisma team for the excellent ORM
-- Material UI team for the component library
-- All contributors who have helped with the project
-
 ## Installation
 
 1. Clone the repository:
@@ -183,7 +143,3 @@ The application will be available at `http://localhost:3000`
 3. Commit your changes (`git commit -m 'Add some amazing feature'`)
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details
