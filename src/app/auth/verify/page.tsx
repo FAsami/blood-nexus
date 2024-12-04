@@ -3,7 +3,8 @@ import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { BiSolidHome, BiSolidInfoCircle } from 'react-icons/bi'
 import VerifyOTPForm from './VerifyOTPForm'
-
+import { TokenType } from '@/schema/auth'
+import * as z from 'zod'
 const VerifyPage = async ({
   searchParams
 }: {
@@ -21,7 +22,7 @@ const VerifyPage = async ({
       phone: string
       email: string
       name: string
-      scope: 'FORGOT_PASSWORD' | 'REGISTER'
+      scope: z.infer<typeof TokenType>
     }
   } catch (error) {
     console.log(error)
