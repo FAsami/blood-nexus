@@ -24,7 +24,7 @@ const Home = () => {
       <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[150px] md:w-[300px] h-[150px] md:h-[300px] rounded-full bg-gradient-to-r from-red-500/30 to-transparent blur-3xl z-[1]" />
       <div className="absolute right-0 top-1/2 -translate-y-1/2 w-[150px] md:w-[300px] h-[150px] md:h-[300px] rounded-full bg-gradient-to-l from-red-500/30 to-transparent blur-3xl z-[1]" />
 
-      <div className="container mx-auto px-4 pt-56 relative z-10">
+      <div className="container mx-auto px-4 pt-24 md:pt-56 relative z-10">
         <div className="max-w-2xl mx-auto space-y-4 md:space-y-6">
           <div className="w-full flex flex-col justify-center">
             <div className="text-neutral-500 text-center font-light text-sm mb-1">
