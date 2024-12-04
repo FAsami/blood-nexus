@@ -6,13 +6,10 @@ import Link from 'next/link'
 import clsx from 'clsx'
 import {
   FaFacebook,
-  FaTwitter,
-  FaLinkedin,
-  FaPinterest,
   FaEnvelope,
-  FaPhone,
   FaBars,
-  FaTimes
+  FaTimes,
+  FaWhatsapp
 } from 'react-icons/fa'
 import { useSession, signIn, signOut } from 'next-auth/react'
 import { Button, Menu, MenuItem, Avatar } from '@mui/material'
@@ -70,39 +67,23 @@ const Header = () => {
         <div className="container mx-auto px-4">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center text-xs md:text-sm">
             <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4 mb-1 sm:mb-0 w-full sm:w-auto">
-              <div className="flex font-bold items-center text-white text-sm mb-1 sm:mb-0">
-                <FaPhone className="h-3 w-3 md:h-4 md:w-4 mr-1" />
-                <span>+1 (454) 556-5656</span>
-              </div>
               <div className="flex items-center text-white t">
                 <FaEnvelope className="h-3 w-3 md:h-4 md:w-4 mr-1" />
-                <span>contact@roktodan.com</span>
+                <span>contact@roktodan.org</span>
               </div>
             </div>
             <div className="flex space-x-3 self-end sm:self-center">
               <Link
                 href="#"
-                className="text-white hover:text-red-500 h-3 w-3 md:h-4 md:w-4"
+                className="text-white hover:text-white h-3 w-3 md:h-4 md:w-4"
               >
                 <FaFacebook className="h-3 w-3 md:h-4 md:w-4" />
               </Link>
               <Link
                 href="#"
-                className="text-white hover:text-red-500 h-3 w-3 md:h-4 md:w-4"
+                className="text-white hover:text-white h-3 w-3 md:h-4 md:w-4"
               >
-                <FaTwitter className="h-3 w-3 md:h-4 md:w-4" />
-              </Link>
-              <Link
-                href="#"
-                className="text-white hover:text-red-500 h-3 w-3 md:h-4 md:w-4"
-              >
-                <FaLinkedin className="h-3 w-3 md:h-4 md:w-4" />
-              </Link>
-              <Link
-                href="#"
-                className="text-white hover:text-red-500 h-3 w-3 md:h-4 md:w-4"
-              >
-                <FaPinterest className="h-3 w-3 md:h-4 md:w-4" />
+                <FaWhatsapp className="h-3 w-3 md:h-4 md:w-4" />
               </Link>
             </div>
           </div>
