@@ -59,13 +59,10 @@ const loginUser: AuthAction<typeof LoginSchema> = async (
       error: 'Something went wrong !'
     }
   }
-  /**
-   * In Server Actions and Route Handlers, redirect should be called after the try/catch block.
-   * Token will be populated if authentication and user creating is successful and then we will redirect
-   * */
 
   if (isLoggedIn) {
-    redirect(callbackUrl)
+    const path = decodeURIComponent(callbackUrl)
+    redirect(path)
   }
 }
 export { loginUser }

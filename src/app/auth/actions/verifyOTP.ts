@@ -45,13 +45,11 @@ const verifyOTP: AuthAction<typeof VerifyOTPSchema> = async (
       return { success: false, error: 'Invalid OTP!' }
     }
 
-    // Check if OTP is expired (15 minutes)
     const tokenAge = Date.now() - new Date(latestToken.createdAt).getTime()
     if (tokenAge > 15 * 60 * 1000) {
       return { success: false, error: 'OTP has expired!' }
     }
 
-    // Check if this is a password reset flow
     isPasswordReset =
       (await prismaClient.token.findFirst({
         where: {
@@ -93,7 +91,7 @@ const verifyOTP: AuthAction<typeof VerifyOTPSchema> = async (
   if (isVerified) {
     revalidatePath('/', 'layout')
     if (isPasswordReset) {
-      redirect('/auth/set-password')
+      redirect(`/auth/set-password?callbackUrl=${callbackUrl}`)
     }
     redirect(callbackUrl)
   }

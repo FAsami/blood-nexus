@@ -114,7 +114,10 @@ const ForgotPasswordPageContent = () => {
 
           <Typography variant="body2" className="text-center">
             Remember your password?{' '}
-            <Link href="/auth/login" className="text-red-500">
+            <Link
+              href={`/auth/login?callbackUrl=${encodeURIComponent(callbackUrl)}`}
+              className="text-red-500"
+            >
               Sign in
             </Link>
           </Typography>

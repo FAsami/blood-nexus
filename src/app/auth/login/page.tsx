@@ -18,7 +18,6 @@ const LoginPageContent = () => {
   const { verifyReCaptcha } = useReCaptcha()
   const searchParams = useSearchParams()
   const callbackUrl = searchParams.get('callbackUrl') ?? '/'
-  const token = searchParams.get('token') ?? ''
 
   const {
     control,
@@ -44,8 +43,7 @@ const LoginPageContent = () => {
           return
         }
         const result = await loginUser(data, {
-          callbackUrl,
-          token
+          callbackUrl
         })
         if (!result?.success) {
           setError(result?.error ?? 'Failed to login. Please try again.')
@@ -65,7 +63,10 @@ const LoginPageContent = () => {
         </Typography>
         <Typography variant="body2" component="p" className="text-center pb-2">
           Don&apos;t have an account?{' '}
-          <Link href="/auth/register" className="text-red-500">
+          <Link
+            href={`/auth/register?callbackUrl=${encodeURIComponent(callbackUrl)}`}
+            className="text-red-500"
+          >
             Sign up
           </Link>
         </Typography>
@@ -134,7 +135,9 @@ const LoginPageContent = () => {
 
         <div className="flex items-center justify-end mt-4">
           <Link
-            href="/auth/forgot-password"
+            href={`/auth/forgot-password?callbackUrl=${encodeURIComponent(
+              callbackUrl
+            )}`}
             className="text-sm text-red-500 border-b border-red-500"
           >
             Forgot password?

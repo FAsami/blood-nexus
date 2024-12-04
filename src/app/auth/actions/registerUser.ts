@@ -39,7 +39,6 @@ const registerUser: AuthAction<typeof RegisterSchema> = async (
       }
     }
 
-    // Create user using Prisma
     const hashedPassword = await bcrypt.hash(password, 10)
     const user = await prismaClient.user.create({
       data: {

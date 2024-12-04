@@ -40,7 +40,7 @@ const setPassword: AuthAction<typeof ResetPasswordSchema> = async (
     }
   }
   if (isPasswordReset) {
-    redirect(callbackUrl)
+    redirect(decodeURIComponent(callbackUrl))
   }
 
   return { success: isPasswordReset }

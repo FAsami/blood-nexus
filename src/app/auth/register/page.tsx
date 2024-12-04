@@ -66,7 +66,10 @@ const RegisterPageContent = () => {
         </Typography>
         <Typography variant="body2" component="p" className="text-center pb-2">
           Already have an account?{' '}
-          <Link href="/auth/login" className="text-red-500">
+          <Link
+            href={`/auth/login?callbackUrl=${encodeURIComponent(callbackUrl)}`}
+            className="text-red-500"
+          >
             Sign in
           </Link>
         </Typography>
