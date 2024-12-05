@@ -14,6 +14,7 @@ import { useSession } from 'next-auth/react'
 import { BloodGroupSelect } from './BloodGroupSelect'
 import { CreateBloodDonationRequestResponse } from '@/types/api'
 import { useSearchUrl } from '@/hooks/useSearchUrl'
+import { GooglePlaceSuggestion } from '@/types/place'
 
 const SearchDonors = () => {
   const router = useRouter()
@@ -44,7 +45,7 @@ const SearchDonors = () => {
     startTransition(async () => {
       try {
         const { data } = await axios.post<CreateBloodDonationRequestResponse>(
-          '/api/blood-donations/requests',
+          '/api/blood-donations/create-request',
           {
             placeId: selectedPlace.place_id,
             bloodGroup: selectedBlood

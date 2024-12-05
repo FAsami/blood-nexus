@@ -8,6 +8,7 @@ import { fonts } from './fonts/font'
 import clsx from 'clsx'
 import { ReCaptchaProvider } from './providers/recaptcha'
 import { SessionProvider } from 'next-auth/react'
+
 export const metadata: Metadata = {
   title: 'রক্তদান - রক্তদান প্ল্যাটফর্ম | Roktodan - Blood Donation Platform',
   description:
@@ -20,7 +21,7 @@ const RootLayout = ({ children }: { children: React.ReactNode }) => {
       <body
         className={clsx(
           fonts.map((font) => font.variable),
-          'font-primary'
+          'font-primary overflow-hidden'
         )}
       >
         <ReCaptchaProvider>
@@ -28,7 +29,7 @@ const RootLayout = ({ children }: { children: React.ReactNode }) => {
             <AppRouterCacheProvider>
               <ThemeProvider theme={theme}>
                 <Header />
-                <main className="min-h-[calc(100vh-var(--header-height))]">
+                <main className="h-[calc(100vh-var(--header-height))] overflow-y-auto">
                   {children}
                 </main>
               </ThemeProvider>

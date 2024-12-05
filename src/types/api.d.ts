@@ -15,3 +15,7 @@ export type ApiResponse<T> = {
 export type CreateBloodDonationRequestResponse = ApiResponse<{
   requestId: string
 }>
+
+export type SubmitBloodDonationRequestResponse = ApiResponse<{
+  requestId: string
+}>

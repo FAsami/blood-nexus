@@ -9,7 +9,7 @@ import { NavigationMenu } from './NavigationMenu'
 const Header = async () => {
   const session = await auth()
   return (
-    <div className="sticky top-0 z-50">
+    <div className="sticky bg-white top-0 z-50">
       <div className="bg-red-500 py-1 md:py-2">
         <div className="container mx-auto px-4">
           <div className="flex  justify-between items-center text-xs md:text-sm">

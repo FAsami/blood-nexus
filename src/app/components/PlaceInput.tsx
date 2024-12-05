@@ -1,4 +1,5 @@
 'use client'
+import { GooglePlaceSuggestion } from '@/types/place'
 import axios, { CancelTokenSource } from 'axios'
 import { useState } from 'react'
 import { IoInformationCircleOutline, IoSearchOutline } from 'react-icons/io5'
@@ -70,7 +71,7 @@ const PlaceInput = ({ startTransition, onPlaceSelect }: PlaceInputProps) => {
         onChange={handleInputChange}
         onFocus={handleFocus}
         onBlur={handleBlur}
-        placeholder="Enter location"
+        placeholder="Type hospital name or location ... "
         className="w-full p-4 pl-12 pr-16 rounded-full border border-gray-200 focus:ring-2 focus:ring-red-500 focus:border-transparent focus:outline-none"
       />
       {isFocused && (

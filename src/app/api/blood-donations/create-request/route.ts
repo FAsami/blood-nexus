@@ -25,14 +25,28 @@ const POST = async (
   )
   const locationDetails =
     data.status === 'OK' ? normalizeAddress(data.result) : null
+  if (!locationDetails) {
+    return NextResponse.json(
+      createResponse<null>(null, {
+        status: 400,
+        code: 'INVALID_PLACE_ID',
+        message: 'Invalid place ID'
+      }),
+      { status: 400 }
+    )
+  }
 
   const bloodDonationRequest = await prismaClient.bloodDonationRequest.create({
     data: {
-      locationId: placeId,
-      bloodGroup,
-      locationDetails: locationDetails
-        ? JSON.parse(JSON.stringify(locationDetails))
-        : null
+      requiredOn: new Date(Date.now() + 24 * 60 * 60 * 1000),
+      address: {
+        create: {
+          ...locationDetails,
+          googlePlaceId: placeId,
+          googlePlaceDetails: data.result
+        }
+      },
+      bloodGroup
     }
   })
 

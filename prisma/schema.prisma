@@ -119,14 +119,7 @@ model Organization {
 model Patient {
   id          String   @id @default(cuid())
   name        String
-  phone       String?
-  email       String?
-  address     String?
-  city        String?
-  state       String?
-  country     String?
-  zipCode     String?
-  gender      String?
+  gender      Gender?
   age         Int?
   bloodGroup  BloodGroup?
   disease     String?
@@ -135,34 +128,46 @@ model Patient {
   bloodDonationRequests BloodDonationRequest[]
 }
 
-model Hospital {
-  id          String   @id @default(cuid())
-  name        String
-  address     String? 
-  city        String?
-  state       String?
-  country     String?
-  zipCode     String?
+
+model Address {
+  id          Int     @id @default(autoincrement())
+  label       String
+  type        AddressType @default(OTHER)
+  division    String  
+  district    String  
+  upazila     String  
+  streetAddress      String? 
+  postalCode  String? 
+  landmark    String? 
+  latitude    Float?
+  longitude   Float?
+  instructions String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  googlePlaceId String?
+  googlePlaceDetails Json?
+
+
+  @@index([division, district, upazila])
   bloodDonationRequests BloodDonationRequest[]
 }
+
 
 
 model BloodDonationRequest {
   id          String   @id @default(cuid())
   userId      String?
-  locationId  String
-  locationDetails Json?
-  hospitalId    String?
-  hospital     Hospital? @relation(fields: [hospitalId], references: [id], onDelete: Cascade)
+  requiredOn    DateTime
+  addressId     Int @unique
+  address     Address @relation(fields: [addressId], references: [id], onDelete: Cascade)
   bloodGroup  BloodGroup
-  unit        Int?
+  unit        Int @default(1)
   patient     Patient? @relation(fields: [patientId], references: [id], onDelete: Cascade)
   patientId   String?
+  phone       String?
   status      BloodDonationRequestStatus @default(PENDING)
   notes       String?
-  reason      String?
+  priority    BloodDonationRequestPriority @default(MEDIUM)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -175,6 +180,12 @@ enum BloodDonationRequestStatus {
   REJECTED
 }
 
+enum BloodDonationRequestPriority {
+  LOW
+  MEDIUM
+  HIGH
+}
+
 enum BloodGroup {
   A_POSITIVE
   A_NEGATIVE
@@ -184,4 +195,16 @@ enum BloodGroup {
   O_NEGATIVE
   AB_POSITIVE
   AB_NEGATIVE
+}
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+  UNDISCLOSED
+}
+
+enum AddressType {
+  HOSPITAL
+  BLOOD_BANK
+  OTHER
 }
