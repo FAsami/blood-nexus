@@ -88,6 +88,8 @@ const authConfig: NextAuthConfig = {
       }
       if (user && user.id) {
         token.id = user.id
+        const userData = await getUser({ id: user.id })
+        token.phone = userData?.phone || null
         const userWithRoles = await prismaClient.user.findUnique({
           where: { id: user.id },
           include: { userRoles: { include: { role: true } } }
@@ -105,6 +107,7 @@ const authConfig: NextAuthConfig = {
       if (token && session.user) {
         session.user.id = token.id as string
         session.user.roles = token.roles as string[]
+        session.user.phone = token.phone as string | null
       }
       return session
     }
