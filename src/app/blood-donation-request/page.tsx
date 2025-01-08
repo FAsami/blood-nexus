@@ -27,7 +27,7 @@ const BloodDonationRequestPage = async ({
   }
   return (
     <div className="container mx-auto overflow-hidden">
-      <BloodDonationRequestInfo requestInfo={requestInfo} />
+      <BloodDonationRequestInfo user={session.user} requestInfo={requestInfo} />
     </div>
   )
 }

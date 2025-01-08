@@ -59,6 +59,18 @@ const POST = async (
         timestamp: new Date().toISOString()
       })
     }
+    if (bloodDonationRequest.status !== 'PENDING') {
+      return NextResponse.json({
+        success: false,
+        data: null,
+        error: {
+          status: 400,
+          code: 'BAD_REQUEST',
+          message: 'Blood donation request already submitted'
+        },
+        timestamp: new Date().toISOString()
+      })
+    }
 
     if (!data.address) {
       return NextResponse.json({
@@ -111,7 +123,7 @@ const POST = async (
         id: data.donationRequestId
       },
       data: {
-        userId: session.user.id,
+        requesterId: session.user.id,
         status: 'PENDING',
         requiredOn: data.donationRequest.requiredOn,
         phone: data.donationRequest.phone,

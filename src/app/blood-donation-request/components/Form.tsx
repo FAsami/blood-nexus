@@ -19,6 +19,7 @@ import { divisions, districts, upazillas } from 'bd-geojs'
 import { useWatch } from 'react-hook-form'
 import { useRouter } from 'next/navigation'
 import { DonationRequestInfo } from '@/types/donation-request'
+import { Session } from 'next-auth'
 
 const steps = ['Donation Details', 'Address', 'Patient']
 
@@ -583,10 +584,13 @@ const FormContent = ({
 
 // Main form component
 const BloodDonationRequestForm = ({
-  requestInfo
+  requestInfo,
+  user
 }: {
   requestInfo: DonationRequestInfo
+  user: Session['user']
 }) => {
+  console.log(user)
   const router = useRouter()
   const [activeStep, setActiveStep] = useState(0)
   const [error, setError] = useState<string | null>(null)
@@ -605,7 +609,7 @@ const BloodDonationRequestForm = ({
         requiredOn: requestInfo?.requiredOn
           ? dayjs(requestInfo.requiredOn)
           : dayjs().add(1, 'day'),
-        phone: requestInfo?.phone || '+880',
+        phone: requestInfo?.phone || user?.phone || '+880',
         notes: requestInfo?.notes || '',
         priority: requestInfo?.priority || 'MEDIUM'
       },
@@ -668,12 +672,17 @@ const BloodDonationRequestForm = ({
       })
 
       const result = await response.json()
+      console.log(result)
 
       if (!result.success) {
         throw new Error(result.error || 'Failed to submit request')
       }
 
-      router.push(`/dashboard/blood-donations`)
+      router.push(
+        `/blood-donation-request/confirmation?id=${encodeURIComponent(
+          result.data.requestId
+        )}`
+      )
     } catch (err) {
       console.error(err)
       setError('Failed to submit the form. Please try again.')

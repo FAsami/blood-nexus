@@ -2,39 +2,46 @@ generator client {
   provider = "prisma-client-js"
 }
 
-
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
-
-
 model User {
-  id            String    @id @default(cuid())
-  name          String
-  email         String?   @unique
-  emailVerified DateTime?
-  phone         String?   @unique
-  phoneVerified DateTime?
-  password      String?
-  image         String?
-  accounts      Account[]
-  sessions      Session[]
-  tokens        Token[]
-  userRoles     UserRole[]
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  bloodDonationRequests BloodDonationRequest[]
+  id                     String                 @id @default(cuid())
+  name                   String
+  email                  String?                @unique
+  emailVerified          DateTime?
+  phone                  String?                @unique
+  phoneVerified          DateTime?
+  password               String?
+  image                  String?
+  accounts               Account[]
+  sessions               Session[]
+  tokens                 Token[]
+  userRoles              UserRole[]
+  bloodGroup             BloodGroup?
+  gender                 Gender?
+  dateOfBirth            DateTime?
+  lastDonatedOn          DateTime?
+  addressId              Int?
+  address                Address?               @relation(fields: [addressId], references: [id], onDelete: Cascade)
+  isActive               Boolean?               @default(true)
+  isAvailableForDonation Boolean?               @default(false)
+  createdAt              DateTime               @default(now())
+  updatedAt              DateTime               @updatedAt
+  requestedBloodDonations BloodDonationRequest[] @relation("Requester")
+  donatedBloodDonations  BloodDonationRequest[] @relation("Donor")
+  blogPosts              BlogPost[]
 }
 
 model Token {
-  id        String   @id @default(cuid())
+  id        String    @id @default(cuid())
   userId    String
   token     String
   type      TokenType @default(OTP)
-  createdAt DateTime @default(now())
-  expiresAt DateTime @default(dbgenerated("NOW() + interval '15 minutes'"))
+  createdAt DateTime  @default(now())
+  expiresAt DateTime  @default(dbgenerated("NOW() + interval '15 minutes'"))
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
@@ -75,12 +82,12 @@ model VerificationToken {
 }
 
 model Role {
-  id          String   @id @default(cuid())
-  name        String   @unique
+  id          String     @id @default(cuid())
+  name        String     @unique
   description String?
   userRoles   UserRole[]
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
 }
 
 model UserRole {
@@ -101,7 +108,6 @@ enum TokenType {
   PHONE_VERIFICATION
 }
 
-
 model Organization {
   id          String   @id @default(cuid())
   name        String   @unique
@@ -117,61 +123,63 @@ model Organization {
 }
 
 model Patient {
-  id          String   @id @default(cuid())
-  name        String
-  gender      Gender?
-  age         Int?
-  bloodGroup  BloodGroup?
-  disease     String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id                    String                 @id @default(cuid())
+  name                  String
+  gender                Gender?
+  age                   Int?
+  bloodGroup            BloodGroup?
+  disease               String?
+  createdAt             DateTime               @default(now())
+  updatedAt             DateTime               @updatedAt
   bloodDonationRequests BloodDonationRequest[]
 }
-
 
 model Address {
-  id          Int     @id @default(autoincrement())
-  label       String
-  type        AddressType @default(OTHER)
-  division    String  
-  district    String  
-  upazila     String  
-  streetAddress      String? 
-  postalCode  String? 
-  landmark    String? 
-  latitude    Float?
-  longitude   Float?
-  instructions String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  googlePlaceId String?
-  googlePlaceDetails Json?
-
+  id                    Int                    @id @default(autoincrement())
+  label                 String
+  type                  AddressType            @default(OTHER)
+  division              String
+  divisionId           String?
+  district              String
+  districtId           String?
+  upazila               String
+  upazilaId             String?
+  streetAddress         String?
+  postalCode            String?
+  landmark              String?
+  latitude              Float?
+  longitude             Float?
+  instructions          String?
+  createdAt             DateTime               @default(now())
+  updatedAt             DateTime               @updatedAt
+  googlePlaceId         String?
+  googlePlaceDetails    Json?
+  bloodDonationRequests BloodDonationRequest[]
+  User                  User[]
 
   @@index([division, district, upazila])
-  bloodDonationRequests BloodDonationRequest[]
 }
 
-
-
 model BloodDonationRequest {
-  id          String   @id @default(cuid())
-  userId      String?
-  requiredOn    DateTime
-  addressId     Int @unique
-  address     Address @relation(fields: [addressId], references: [id], onDelete: Cascade)
+  id         String                       @id @default(cuid())
+  requesterId  String?
+  donorId     String?
+  requiredOn  DateTime
+  addressId   Int                          @unique
+  address     Address                      @relation(fields: [addressId], references: [id], onDelete: Cascade)
   bloodGroup  BloodGroup
-  unit        Int @default(1)
-  patient     Patient? @relation(fields: [patientId], references: [id], onDelete: Cascade)
-  patientId   String?
-  phone       String?
-  status      BloodDonationRequestStatus @default(PENDING)
-  notes       String?
-  priority    BloodDonationRequestPriority @default(MEDIUM)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  unit        Int                          @default(1)
+  patient     Patient?                     @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  patientId  String?
+  phone      String?
+  status     BloodDonationRequestStatus   @default(PENDING)
+  notes      String?
+  priority   BloodDonationRequestPriority @default(MEDIUM)
+  createdAt  DateTime                     @default(now())
+  updatedAt  DateTime                     @updatedAt
 
-  user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
+  requester  User? @relation("Requester", fields: [requesterId], references: [id], onDelete: Cascade)
+  donor      User? @relation("Donor", fields: [donorId], references: [id], onDelete: Cascade)
 }
 
 enum BloodDonationRequestStatus {
@@ -196,6 +204,7 @@ enum BloodGroup {
   AB_POSITIVE
   AB_NEGATIVE
 }
+
 enum Gender {
   MALE
   FEMALE
@@ -207,4 +216,39 @@ enum AddressType {
   HOSPITAL
   BLOOD_BANK
   OTHER
+}
+
+
+model BlogPost {
+  id          String      @id @default(cuid())
+  title       String
+  slug        String      @unique
+  content     String      @db.Text
+  excerpt     String?     @db.Text
+  featuredImage String?
+  published   Boolean     @default(false)
+  authorId    String
+  author      User        @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  categories  BlogPostCategory[]
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+}
+
+model BlogCategory {
+  id          String      @id @default(cuid())
+  name        String      @unique
+  slug        String      @unique
+  description String?
+  posts       BlogPostCategory[]
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+}
+
+model BlogPostCategory {
+  postId      String
+  categoryId  String
+  post        BlogPost    @relation(fields: [postId], references: [id], onDelete: Cascade)
+  category    BlogCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@id([postId, categoryId])
 }
