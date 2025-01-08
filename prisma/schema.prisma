@@ -22,7 +22,7 @@ model User {
   userRoles              UserRole[]
   bloodGroup             BloodGroup?
   gender                 Gender?
-  age                    Int?
+  dateOfBirth            DateTime?
   lastDonatedOn          DateTime?
   addressId              Int?
   address                Address?               @relation(fields: [addressId], references: [id], onDelete: Cascade)
@@ -32,6 +32,7 @@ model User {
   updatedAt              DateTime               @updatedAt
   requestedBloodDonations BloodDonationRequest[] @relation("Requester")
   donatedBloodDonations  BloodDonationRequest[] @relation("Donor")
+  blogPosts              BlogPost[]
 }
 
 model Token {
@@ -138,8 +139,11 @@ model Address {
   label                 String
   type                  AddressType            @default(OTHER)
   division              String
+  divisionId           String?
   district              String
+  districtId           String?
   upazila               String
+  upazilaId             String?
   streetAddress         String?
   postalCode            String?
   landmark              String?
@@ -212,4 +216,39 @@ enum AddressType {
   HOSPITAL
   BLOOD_BANK
   OTHER
+}
+
+
+model BlogPost {
+  id          String      @id @default(cuid())
+  title       String
+  slug        String      @unique
+  content     String      @db.Text
+  excerpt     String?     @db.Text
+  featuredImage String?
+  published   Boolean     @default(false)
+  authorId    String
+  author      User        @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  categories  BlogPostCategory[]
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+}
+
+model BlogCategory {
+  id          String      @id @default(cuid())
+  name        String      @unique
+  slug        String      @unique
+  description String?
+  posts       BlogPostCategory[]
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+}
+
+model BlogPostCategory {
+  postId      String
+  categoryId  String
+  post        BlogPost    @relation(fields: [postId], references: [id], onDelete: Cascade)
+  category    BlogCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@id([postId, categoryId])
 }
