@@ -1,38 +1,62 @@
 'use client'
 import { GooglePlaceSuggestion } from '@/types/place'
+import { CircularProgress } from '@mui/material'
 import axios, { CancelTokenSource } from 'axios'
-import { useState } from 'react'
+import clsx from 'clsx'
+import { useState, useRef, useEffect } from 'react'
+import { FaMapMarkerAlt } from 'react-icons/fa'
 import { IoInformationCircleOutline, IoSearchOutline } from 'react-icons/io5'
 
 interface PlaceInputProps {
   startTransition: (callback: () => void) => void
   onPlaceSelect: (place: GooglePlaceSuggestion) => void
+  variant?: 'default' | 'input-field'
+  isPending?: boolean
 }
 
-const PlaceInput = ({ startTransition, onPlaceSelect }: PlaceInputProps) => {
+const PlaceInput = ({
+  startTransition,
+  onPlaceSelect,
+  isPending,
+  variant = 'default'
+}: PlaceInputProps) => {
   const [input, setInput] = useState('')
-  let debounceTimer: NodeJS.Timeout
-  let cancelTokenSource: CancelTokenSource | null = null
   const [isFocused, setIsFocused] = useState(false)
   const [suggestions, setSuggestions] = useState<GooglePlaceSuggestion[]>([])
+  const debounceTimerRef = useRef<NodeJS.Timeout>()
+  const cancelTokenRef = useRef<CancelTokenSource | null>(null)
+
+  useEffect(() => {
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current)
+      }
+      if (cancelTokenRef.current) {
+        cancelTokenRef.current.cancel('Component unmounted')
+      }
+    }
+  }, [])
 
   const handleInputChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value
     setInput(value)
 
-    clearTimeout(debounceTimer)
-    if (cancelTokenSource) {
-      cancelTokenSource.cancel('New request initiated')
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current)
+    }
+
+    if (cancelTokenRef.current) {
+      cancelTokenRef.current.cancel('New request initiated')
     }
 
     if (value.length > 2) {
-      debounceTimer = setTimeout(() => {
+      debounceTimerRef.current = setTimeout(() => {
         startTransition(async () => {
           try {
-            cancelTokenSource = axios.CancelToken.source()
+            cancelTokenRef.current = axios.CancelToken.source()
             const { data } = await axios.get('/api/places/suggestions', {
               params: { input: value },
-              cancelToken: cancelTokenSource.token
+              cancelToken: cancelTokenRef.current.token
             })
             setSuggestions(data.predictions || [])
           } catch (error) {
@@ -65,6 +89,18 @@ const PlaceInput = ({ startTransition, onPlaceSelect }: PlaceInputProps) => {
 
   return (
     <div className="relative">
+      {variant === 'input-field' && (
+        <>
+          <FaMapMarkerAlt className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-xl" />
+          {isPending ? (
+            <div className="absolute right-4 top-1/2 -translate-y-1/2 text-red-500">
+              <CircularProgress size={24} color="inherit" />
+            </div>
+          ) : (
+            <IoSearchOutline className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-xl" />
+          )}
+        </>
+      )}
       <input
         type="text"
         value={input}
@@ -72,7 +108,10 @@ const PlaceInput = ({ startTransition, onPlaceSelect }: PlaceInputProps) => {
         onFocus={handleFocus}
         onBlur={handleBlur}
         placeholder="Type hospital name or location ... "
-        className="w-full p-4 pl-12 pr-16 rounded-full border border-gray-200 focus:ring-2 focus:ring-red-500 focus:border-transparent focus:outline-none"
+        className={clsx(
+          'w-full p-4 pl-12 pr-16 rounded-full border border-gray-200 focus:ring-2 focus:ring-red-500 focus:border-transparent focus:outline-none',
+          variant === 'input-field' && 'rounded-md'
+        )}
       />
       {isFocused && (
         <div className="absolute z-10 w-full mt-1 bg-white rounded-lg shadow-lg border border-gray-200 max-h-60 overflow-y-auto">
