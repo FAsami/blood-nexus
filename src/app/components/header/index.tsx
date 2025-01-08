@@ -2,14 +2,21 @@ import { auth } from '@/auth'
 import Link from 'next/link'
 import { FaFacebook, FaWhatsapp } from 'react-icons/fa'
 import { FaEnvelope } from 'react-icons/fa'
-import Image from 'next/image'
-import { Person } from '@mui/icons-material'
+import { Bloodtype, Person } from '@mui/icons-material'
 import { NavigationMenu } from './NavigationMenu'
+import { Righteous } from 'next/font/google'
+import clsx from 'clsx'
+
+const righteous = Righteous({
+  subsets: ['latin'],
+  weight: ['400']
+})
 
 const Header = async () => {
   const session = await auth()
+
   return (
-    <div className="sticky bg-white top-0 z-50">
+    <div className="sticky bg-white top-0 z-50 border-b border-red-100">
       <div className="bg-red-500 py-1 md:py-2">
         <div className="container mx-auto px-4">
           <div className="flex  justify-between items-center text-xs md:text-sm">
@@ -40,15 +47,14 @@ const Header = async () => {
         <div className="container mx-auto px-4">
           <div className="flex justify-between items-center py-2 md:py-4">
             <Link href="/" className="flex items-center gap-2">
-              <Image
-                src="/logo.png"
-                alt="Roktodan"
-                width={120}
-                height={40}
-                className="h-8 md:h-12 w-auto"
-              />
-              <span className="text-lg md:text-xl font-medium text-red-500 font-bengali hidden sm:block">
-                Roktodan
+              <Bloodtype sx={{ fontSize: 40 }} className="text-red-500" />
+              <span
+                className={clsx(
+                  'text-lg md:text-xl font-medium text-red-500 font-bengali hidden sm:block',
+                  righteous.className
+                )}
+              >
+                Blood Nexus
               </span>
             </Link>
 

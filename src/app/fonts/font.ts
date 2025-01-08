@@ -1,6 +1,6 @@
-import { Montserrat, Noto_Sans_Bengali } from 'next/font/google'
+import { Noto_Sans, Noto_Sans_Bengali } from 'next/font/google'
 
-const primary = Montserrat({
+const primary = Noto_Sans({
   weight: ['400', '700', '500', '900'],
   subsets: ['latin'],
   variable: '--font-primary'

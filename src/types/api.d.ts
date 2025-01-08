@@ -19,3 +19,7 @@ export type CreateBloodDonationRequestResponse = ApiResponse<{
 export type SubmitBloodDonationRequestResponse = ApiResponse<{
   requestId: string
 }>
+
+export type ChangePasswordResponse = ApiResponse<{
+  message: string
+}>
