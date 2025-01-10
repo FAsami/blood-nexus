@@ -4,6 +4,9 @@ import { NextResponse } from 'next/server'
 import { prismaClient } from '@/lib/prismaClient'
 import { BloodDonationRequestFormInput } from '@/schema/donation-request'
 import { auth } from '@/auth'
+import { findNearbyDonors } from '@/utils/findNearbyDonors'
+import { sendMessage } from '@/utils/sendMessage'
+import { donationRequestMessage } from '@/template/donationRequest'
 
 const POST = async (
   req: NextRequest
@@ -44,6 +47,9 @@ const POST = async (
       await prismaClient.bloodDonationRequest.findUnique({
         where: {
           id: data.donationRequestId
+        },
+        include: {
+          address: true
         }
       })
 
@@ -134,6 +140,41 @@ const POST = async (
         bloodGroup: data.donationRequest.bloodGroup
       }
     })
+
+    const potentialDonors = await findNearbyDonors({
+      bloodGroup: data.donationRequest.bloodGroup,
+      latitude: bloodDonationRequest?.address?.latitude || 0,
+      longitude: bloodDonationRequest?.address?.longitude || 0
+    })
+    console.log(potentialDonors)
+
+    for (const donor of potentialDonors) {
+      const confirmationUrl = `${process.env.NEXT_PUBLIC_APP_URL}/donate/confirm/${result.id}?donorId=${donor.id}`
+
+      const message = donationRequestMessage({
+        bloodGroup: data.donationRequest.bloodGroup,
+        location: {
+          district: data.address.district,
+          division: data.address.division,
+          upazila: data.address.upazila
+        },
+        requiredOn: data.donationRequest.requiredOn,
+        confirmationUrl,
+        distance: donor.distance,
+        duration: donor.duration,
+        unit: data.donationRequest.unit,
+        priority: data.donationRequest.priority
+      })
+
+      try {
+        await sendMessage({
+          phone: donor.phone || '',
+          message
+        })
+      } catch (error) {
+        console.error(`Failed to send message to donor ${donor.id}:`, error)
+      }
+    }
 
     return NextResponse.json({
       success: true,
