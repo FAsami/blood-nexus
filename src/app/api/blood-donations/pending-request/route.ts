@@ -17,40 +17,35 @@ export async function GET() {
       )
     }
 
-    const pendingRequest = await prismaClient.bloodDonationRequest.findFirst({
+    const pendingRequest = await prismaClient.requestedDonor.findMany({
       where: {
-        donorId: session.user.id,
+        userId: session.user.id,
         status: {
           in: ['PENDING', 'ACCEPTED']
         }
       },
       include: {
-        requester: {
+        bloodDonationRequest: {
           select: {
-            name: true
-          }
-        },
-        address: {
-          select: {
-            division: true,
-            district: true
-          }
-        },
-        requestedDonors: {
-          include: {
-            user: {
+            requester: true,
+            address: true,
+            patient: true,
+            bloodGroup: true,
+            unit: true,
+            priority: true,
+            notes: true,
+            requiredOn: true,
+            requestedDonors: {
               select: {
-                name: true
+                user: true,
+                status: true
               }
             }
           }
         }
-      },
-      orderBy: {
-        createdAt: 'desc'
       }
     })
-    console.log(pendingRequest)
+    console.log('pendingRequest', pendingRequest)
 
     return NextResponse.json(
       createResponse({

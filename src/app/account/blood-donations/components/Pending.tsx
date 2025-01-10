@@ -1,8 +1,6 @@
 'use client'
 
 import {
-  Card,
-  CardContent,
   Typography,
   Button,
   Chip,
@@ -14,12 +12,12 @@ import { format } from 'date-fns'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import axios from 'axios'
 import {
-  BloodDonationRequest,
   User,
   Address,
   BloodDonationRequestStatus,
   BloodDonationRequestPriority,
-  RequestedDonorStatus
+  RequestedDonorStatus,
+  BloodDonationRequest
 } from '@prisma/client'
 import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 import CancelIcon from '@mui/icons-material/Cancel'
@@ -28,36 +26,41 @@ import CalendarTodayIcon from '@mui/icons-material/CalendarToday'
 import LocalHospitalIcon from '@mui/icons-material/LocalHospital'
 import PhoneIcon from '@mui/icons-material/Phone'
 
-type BloodDonationWithRelations = BloodDonationRequest & {
-  requester: Pick<User, 'name'> | null
-  donor: Pick<User, 'name'> | null
-  address: Pick<Address, 'division' | 'district'>
-  requestedDonors: Array<{
-    id: string
-    requestedAt: Date
-    status: RequestedDonorStatus
-    user: Pick<User, 'name'>
-  }>
+type PendingRequestWithRelations = {
+  id: string
+  userId: string
+  status: RequestedDonorStatus
+  bloodDonationRequestId: string
+  bloodDonationRequest: BloodDonationRequest & {
+    requester: User
+    address: Address
+    requestedDonors: Array<{
+      user: User
+      status: RequestedDonorStatus
+    }>
+  }
 }
 
 const PendingRequests = () => {
   const queryClient = useQueryClient()
 
   const {
-    data: request,
+    data: requests,
     isLoading,
     isError
   } = useQuery({
     queryKey: ['pending-request'],
     queryFn: async () => {
       const response = await axios.get('/api/blood-donations/pending-request')
-
+      console.log('response', response)
       if (!response.data.success) {
         throw new Error(response.data.error?.message || 'An error occurred')
       }
-      return response.data.data.data as BloodDonationWithRelations
+      return response.data.data.data as PendingRequestWithRelations[]
     }
   })
+
+  console.log('requests', requests)
 
   const updateRequestStatus = useMutation({
     mutationFn: async ({
@@ -74,16 +77,18 @@ const PendingRequests = () => {
       if (!response.data.success) {
         throw new Error(response.data.error?.message || 'An error occurred')
       }
-      return response.data.data.data
+      return response.data.data
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['pending-request'] })
     }
   })
 
-  const handleStatusUpdate = (status: BloodDonationRequestStatus) => {
-    if (!request) return
-    updateRequestStatus.mutate({ requestId: request.id, status })
+  const handleStatusUpdate = (
+    requestId: string,
+    status: BloodDonationRequestStatus
+  ) => {
+    updateRequestStatus.mutate({ requestId, status })
   }
 
   const getPriorityChip = (priority: BloodDonationRequestPriority) => {
@@ -116,12 +121,12 @@ const PendingRequests = () => {
   if (isError) {
     return (
       <Alert severity="error" sx={{ m: 2 }}>
-        Error loading request
+        Error loading requests
       </Alert>
     )
   }
 
-  if (!request) {
+  if (!requests?.length) {
     return (
       <Alert severity="info" sx={{ m: 2 }}>
         No pending requests found
@@ -130,103 +135,131 @@ const PendingRequests = () => {
   }
 
   return (
-    <Card sx={{ m: 2 }}>
-      <CardContent>
-        <Box
-          display="flex"
-          justifyContent="space-between"
-          alignItems="center"
-          mb={2}
-        >
-          <Typography variant="h6" component="div">
-            Blood Donation Request
-          </Typography>
-          {getPriorityChip(request.priority)}
-        </Box>
+    <div>
+      {requests.map((request) => (
+        <div key={request.id} className="m-2 p-4 border rounded-md">
+          <div>
+            <div className="flex justify-end w-full">
+              {getPriorityChip(request.bloodDonationRequest.priority)}
+            </div>
 
-        <Box display="flex" alignItems="center" gap={1} mb={1}>
-          <LocalHospitalIcon color="error" />
-          <Typography variant="body1">
-            {request.unit} unit(s) of {request.bloodGroup.replace('_', ' ')}{' '}
-            blood needed
-          </Typography>
-        </Box>
+            <Box display="flex" alignItems="center" gap={1} mb={1}>
+              <LocalHospitalIcon color="error" />
+              <Typography variant="body1">
+                {request.bloodDonationRequest.unit} unit(s) of{' '}
+                {request.bloodDonationRequest.bloodGroup.replace('_', ' ')}{' '}
+                blood needed
+              </Typography>
+            </Box>
 
-        <Box display="flex" alignItems="center" gap={1} mb={1}>
-          <LocationOnIcon color="action" />
-          <Typography variant="body1">
-            {request.address.division}, {request.address.district}
-          </Typography>
-        </Box>
+            <div className="flex items-center gap-1 mb-1">
+              <LocationOnIcon color="action" />
+              <Typography variant="body1">
+                {request.bloodDonationRequest.address.division},{' '}
+                {request.bloodDonationRequest.address.district}
+              </Typography>
+            </div>
 
-        <Box display="flex" alignItems="center" gap={1} mb={1}>
-          <CalendarTodayIcon color="action" />
-          <Typography variant="body1">
-            Required by: {format(new Date(request.requiredOn), 'PPP')}
-          </Typography>
-        </Box>
+            <div className="flex items-center gap-1 mb-1">
+              <CalendarTodayIcon color="action" />
+              <Typography variant="body1">
+                Required by:{' '}
+                {format(
+                  new Date(request.bloodDonationRequest.requiredOn),
+                  'PPP'
+                )}
+              </Typography>
+            </div>
 
-        {request.phone && (
-          <Box display="flex" alignItems="center" gap={1} mb={2}>
-            <PhoneIcon color="action" />
-            <Typography variant="body1">{request.phone}</Typography>
-          </Box>
-        )}
+            {request.bloodDonationRequest.phone && (
+              <div className="flex items-center gap-1 mb-2">
+                <PhoneIcon color="action" />
+                <Typography variant="body1">
+                  {request.bloodDonationRequest.phone}
+                </Typography>
+              </div>
+            )}
 
-        {request.notes && (
-          <Typography variant="body2" color="text.secondary" mb={3}>
-            Note: {request.notes}
-          </Typography>
-        )}
+            {request.bloodDonationRequest.notes && (
+              <div className="text-sm text-gray-500 mb-3">
+                Note: {request.bloodDonationRequest.notes}
+              </div>
+            )}
 
-        <Box display="flex" gap={2} mt={2}>
-          {request.status === 'PENDING' && (
-            <>
-              <Button
-                variant="contained"
-                color="success"
-                startIcon={<CheckCircleIcon />}
-                onClick={() => handleStatusUpdate('ACCEPTED')}
-                disabled={isUpdating}
-              >
-                {isUpdating ? 'Accepting...' : 'Accept Request'}
-              </Button>
-              <Button
-                variant="contained"
-                color="error"
-                startIcon={<CancelIcon />}
-                onClick={() => handleStatusUpdate('REJECTED')}
-                disabled={isUpdating}
-              >
-                {isUpdating ? 'Rejecting...' : 'Reject Request'}
-              </Button>
-            </>
-          )}
-          {request.status === 'ACCEPTED' && (
-            <>
-              <Button
-                variant="contained"
-                color="success"
-                startIcon={<CheckCircleIcon />}
-                onClick={() => handleStatusUpdate('COMPLETED')}
-                disabled={isUpdating}
-              >
-                {isUpdating ? 'Completing...' : 'Mark as Completed'}
-              </Button>
-              <Button
-                variant="contained"
-                color="error"
-                startIcon={<CancelIcon />}
-                onClick={() => handleStatusUpdate('REJECTED')}
-                disabled={isUpdating}
-              >
-                {isUpdating ? 'Rejecting...' : 'Reject Request'}
-              </Button>
-            </>
-          )}
-        </Box>
-      </CardContent>
-    </Card>
+            <Box display="flex" gap={2} mt={2}>
+              {request.status === 'PENDING' && (
+                <>
+                  <Button
+                    variant="outlined"
+                    color="success"
+                    startIcon={<CheckCircleIcon />}
+                    onClick={() =>
+                      handleStatusUpdate(
+                        request.bloodDonationRequestId,
+                        'ACCEPTED'
+                      )
+                    }
+                    disabled={isUpdating}
+                    disableElevation
+                  >
+                    {isUpdating ? 'Accepting...' : 'Accept'}
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    color="error"
+                    startIcon={<CancelIcon />}
+                    onClick={() =>
+                      handleStatusUpdate(
+                        request.bloodDonationRequestId,
+                        'REJECTED'
+                      )
+                    }
+                    disabled={isUpdating}
+                    disableElevation
+                  >
+                    {isUpdating ? 'Rejecting...' : 'Reject'}
+                  </Button>
+                </>
+              )}
+              {request.status === 'ACCEPTED' && (
+                <>
+                  <Button
+                    variant="outlined"
+                    color="success"
+                    startIcon={<CheckCircleIcon />}
+                    onClick={() =>
+                      handleStatusUpdate(
+                        request.bloodDonationRequestId,
+                        'COMPLETED'
+                      )
+                    }
+                    disabled={isUpdating}
+                    disableElevation
+                  >
+                    {isUpdating ? 'Completing...' : 'Mark as Completed'}
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    color="error"
+                    startIcon={<CancelIcon />}
+                    onClick={() =>
+                      handleStatusUpdate(
+                        request.bloodDonationRequestId,
+                        'REJECTED'
+                      )
+                    }
+                    disabled={isUpdating}
+                    disableElevation
+                  >
+                    {isUpdating ? 'Rejecting...' : 'Reject'}
+                  </Button>
+                </>
+              )}
+            </Box>
+          </div>
+        </div>
+      ))}
+    </div>
   )
 }
 
