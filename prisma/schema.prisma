@@ -33,6 +33,7 @@ model User {
   requestedBloodDonations BloodDonationRequest[] @relation("Requester")
   donatedBloodDonations  BloodDonationRequest[] @relation("Donor")
   blogPosts              BlogPost[]
+  requestedAsDonor      RequestedDonor[]
 }
 
 model Token {
@@ -180,12 +181,15 @@ model BloodDonationRequest {
 
   requester  User? @relation("Requester", fields: [requesterId], references: [id], onDelete: Cascade)
   donor      User? @relation("Donor", fields: [donorId], references: [id], onDelete: Cascade)
+  requestedDonors RequestedDonor[]
 }
 
 enum BloodDonationRequestStatus {
   PENDING
   ACCEPTED
   REJECTED
+  IGNORED
+  COMPLETED
 }
 
 enum BloodDonationRequestPriority {
@@ -251,4 +255,23 @@ model BlogPostCategory {
   category    BlogCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
 
   @@id([postId, categoryId])
+}
+
+model RequestedDonor {
+  id                    String               @id @default(cuid())
+  bloodDonationRequest  BloodDonationRequest @relation(fields: [bloodDonationRequestId], references: [id], onDelete: Cascade)
+  bloodDonationRequestId String
+  user                  User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId                String
+  requestedAt           DateTime             @default(now())
+  status                RequestedDonorStatus @default(PENDING)
+
+  @@unique([bloodDonationRequestId, userId])
+}
+
+enum RequestedDonorStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  IGNORED
 }

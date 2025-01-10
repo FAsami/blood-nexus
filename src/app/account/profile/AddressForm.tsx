@@ -7,14 +7,12 @@ import { useWatch } from 'react-hook-form'
 import { divisions, districts, upazillas } from 'bd-geojs'
 import { AddressInput, AddressSchema } from '@/schema/donation-request'
 import { UpdateProfileInput } from '@/schema/account'
-import PlaceInput from '@/app/components/PlaceInput'
-import { useState, useTransition } from 'react'
-import { GooglePlaceSuggestion } from '@/types/place'
-import axios from 'axios'
+import Map from '@/app/components/Map'
+import { useState, useRef, useEffect, RefObject } from 'react'
 
 type FieldConfig = {
   name: keyof AddressInput
-  type: string
+  fieldType: string
   label: string
   options?: { id: string; label: string }[]
   placeholder?: string
@@ -48,23 +46,23 @@ const getUpazilaOptions = (districtId: string) => {
 const addressFields: Array<FieldConfig> = [
   {
     name: 'label',
-    type: 'text',
+    fieldType: 'text',
     label: 'Label',
     placeholder: 'eg. Home, Office'
   },
   {
     name: 'type',
-    type: 'select',
+    fieldType: 'select',
     label: 'Address Type',
     options: [
-      { id: 'HOME', label: 'Home' },
-      { id: 'OFFICE', label: 'Office' },
+      { id: 'HOSPITAL', label: 'Hospital' },
+      { id: 'BLOOD_BANK', label: 'Blood Bank' },
       { id: 'OTHER', label: 'Other' }
     ]
   },
   {
     name: 'streetAddress',
-    type: 'text',
+    fieldType: 'text',
     label: 'Street Address',
     placeholder: 'eg. 22, Baker Street',
     multiline: true,
@@ -72,19 +70,19 @@ const addressFields: Array<FieldConfig> = [
   },
   {
     name: 'landmark',
-    type: 'text',
+    fieldType: 'text',
     label: 'Landmark',
     placeholder: 'eg. Near to Shopping Mall'
   },
   {
     name: 'postalCode',
-    type: 'text',
+    fieldType: 'text',
     label: 'Postal Code',
     placeholder: 'eg. 1200'
   },
   {
     name: 'instructions',
-    type: 'text',
+    fieldType: 'text',
     label: 'Additional Instructions',
     placeholder: 'Any other instructions',
     multiline: true,
@@ -190,8 +188,6 @@ const AddressForm = ({
   initial?: UpdateProfileInput['address']
   onSubmit: (data: AddressInput) => void
 }) => {
-  const [isPending, startTransition] = useTransition()
-
   const initialAddress: AddressInput = {
     label: initial?.label || '',
     type: initial?.type || 'OTHER',
@@ -201,32 +197,38 @@ const AddressForm = ({
     streetAddress: initial?.streetAddress || '',
     postalCode: initial?.postalCode || '',
     landmark: initial?.landmark || '',
-    instructions: initial?.instructions || ''
+    instructions: initial?.instructions || '',
+    latitude: initial?.latitude || undefined,
+    longitude: initial?.longitude || undefined
   }
   const [address, setAddress] = useState<AddressInput>(initialAddress)
+  const formRef = useRef<HTMLFormElement>(null)
 
-  const handlePlaceSelect = async (place: GooglePlaceSuggestion) => {
-    try {
-      const { data } = await axios.get(
-        `/api/places/details?placeId=${place.place_id}`
-      )
-      setAddress(data.data)
-    } catch (error) {
-      console.error('Error fetching place details:', error)
+  const handleLocationSelect = (latitude: number, longitude: number) => {
+    setAddress((prev) => ({
+      ...prev,
+      latitude,
+      longitude
+    }))
+    if (formRef.current) {
+      const event = new CustomEvent('location-change', {
+        detail: { latitude, longitude }
+      })
+      formRef.current.dispatchEvent(event)
     }
   }
 
   return (
     <div className="max-w-xl">
       <div className="px-6 pt-6">
-        <PlaceInput
-          startTransition={startTransition}
-          onPlaceSelect={handlePlaceSelect}
-          variant="input-field"
-          isPending={isPending}
+        <Map
+          onLocationSelect={handleLocationSelect}
+          initialLatitude={address?.latitude || 23.8103}
+          initialLongitude={address?.longitude || 90.4125}
+          height="300px"
         />
       </div>
-      <Form initial={address} onSubmit={onSubmit} />
+      <Form initial={address} onSubmit={onSubmit} formRef={formRef} />
     </div>
   )
 }
@@ -235,43 +237,81 @@ export default AddressForm
 
 const Form = ({
   initial,
-  onSubmit
+  onSubmit,
+  formRef
 }: {
   initial: AddressInput
   onSubmit: (data: AddressInput) => void
+  formRef: RefObject<HTMLFormElement>
 }) => {
   const {
     control,
     handleSubmit,
+    setValue,
+    register,
     formState: { errors }
   } = useForm<AddressInput>({
     resolver: zodResolver(AddressSchema),
     defaultValues: {
-      division: initial?.division || '',
-      district: initial?.district || '',
-      upazila: initial?.upazila || ''
+      ...initial,
+      latitude: initial.latitude,
+      longitude: initial.longitude
     }
   })
 
+  useEffect(() => {
+    const form = formRef.current
+    if (!form) return
+
+    const handleLocationChange = (e: Event) => {
+      const { latitude, longitude } = (e as CustomEvent).detail
+      setValue('latitude', latitude)
+      setValue('longitude', longitude)
+    }
+
+    form.addEventListener('location-change', handleLocationChange)
+    return () => {
+      form.removeEventListener('location-change', handleLocationChange)
+    }
+  }, [setValue])
+
   const onSubmitHandler = (data: AddressInput) => {
+    console.log(data)
     onSubmit(data)
   }
 
   return (
     <form
+      ref={formRef}
       id="address-form"
       onSubmit={handleSubmit(onSubmitHandler)}
       className="w-full space-y-6 p-6 relative rounded-md"
     >
-      {addressFields.slice(0, 2).map((field) => (
-        <TextFieldElement
-          key={field.name}
-          {...field}
-          control={control}
-          helperText={errors[field.name]?.message}
-          {...commonTextFieldProps}
-        />
-      ))}
+      <TextFieldElement
+        {...addressFields[0]}
+        control={control}
+        helperText={errors.label?.message}
+        {...commonTextFieldProps}
+      />
+      <SelectElement
+        {...addressFields[1]}
+        control={control}
+        helperText={errors.type?.message}
+        fullWidth={true}
+        slotProps={{
+          ...commonTextFieldProps.slotProps,
+          select: {
+            displayEmpty: true,
+            renderValue: (value: unknown) => {
+              if (!value) return 'Select one'
+              const option = addressFields[1].options?.find(
+                (opt) => opt.id === value
+              )
+              return option?.label || String(value)
+            }
+          }
+        }}
+      />
 
       <LocationFields control={control} errors={errors} />
 
@@ -284,6 +324,9 @@ const Form = ({
           {...commonTextFieldProps}
         />
       ))}
+
+      <input type="hidden" {...register('latitude')} />
+      <input type="hidden" {...register('longitude')} />
     </form>
   )
 }

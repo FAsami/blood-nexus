@@ -58,6 +58,8 @@ const Requests = () => {
         return 'success'
       case 'REJECTED':
         return 'error'
+      case 'COMPLETED':
+        return 'success'
       default:
         return 'default'
     }
