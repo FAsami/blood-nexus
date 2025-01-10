@@ -23,18 +23,19 @@ export async function findNearbyDonors({
   maxDistance?: number
   limit?: number
 }): Promise<NearbyDonor[]> {
+  console.log(bloodGroup)
   const donors = await prismaClient.user.findMany({
     where: {
-      bloodGroup,
-      isAvailableForDonation: true,
-      isActive: true,
-      lastDonatedOn: {
-        lte: new Date(Date.now() - 90 * 24 * 60 * 60 * 1000)
-      },
-      address: {
-        latitude: { not: null },
-        longitude: { not: null }
-      }
+      // bloodGroup,
+      // isAvailableForDonation: true,
+      // isActive: true,
+      // lastDonatedOn: {
+      //   lte: new Date(Date.now() - 90 * 24 * 60 * 60 * 1000)
+      // }
+      // address: {
+      //   latitude: { not: null },
+      //   longitude: { not: null }
+      // }
     },
     select: {
       id: true,
@@ -48,6 +49,8 @@ export async function findNearbyDonors({
       }
     }
   })
+  return donors
+  console.log('donors', donors)
 
   const donorsWithDistance = await Promise.all(
     donors.map(async (donor) => {

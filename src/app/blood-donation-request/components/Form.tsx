@@ -663,6 +663,7 @@ const BloodDonationRequestForm = ({
   const onSubmit = async (data: BloodDonationRequestFormInput) => {
     setError(null)
     try {
+      console.log('====>', { donationRequestId: requestInfo.id, ...data })
       const response = await fetch('/api/blood-donations/submit-request', {
         method: 'POST',
         headers: {

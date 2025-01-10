@@ -1,12 +1,9 @@
-import { BloodGroup } from '@prisma/client'
+import { formatAddress } from '@/utils/formatAddress'
+import { BloodGroup, Address } from '@prisma/client'
 
 interface DonationRequestMessageProps {
   bloodGroup: BloodGroup
-  location: {
-    district: string
-    division: string
-    upazila?: string
-  }
+  location: Address
   requiredOn: Date
   confirmationUrl: string
   distance?: number
@@ -18,33 +15,15 @@ interface DonationRequestMessageProps {
 export const donationRequestMessage = ({
   bloodGroup,
   location,
-  requiredOn,
-  confirmationUrl,
-  distance,
-  duration,
-  unit,
-  priority
+  requiredOn
 }: DonationRequestMessageProps) => {
   const formattedBloodGroup = bloodGroup.replace('_', ' ')
-  const formattedLocation = [location.district, location.division]
-    .filter(Boolean)
-    .join(', ')
+  const formattedLocation = formatAddress(location)
   const formattedDate = new Date(requiredOn).toLocaleDateString()
 
-  let message = `Urgent ${priority.toLowerCase()} priority blood donation request!
+  let message = `Need ${formattedBloodGroup} blood in ${formattedLocation} by ${formattedDate}.`
 
-Required: ${unit} unit(s) of ${formattedBloodGroup} blood
-Location: ${formattedLocation}`
-
-  if (distance && duration) {
-    message += `\nDistance: ${Math.round(distance * 10) / 10}km (${Math.round(duration)} mins away)`
-  }
-
-  message += `\nRequired on: ${formattedDate}
-
-Click to confirm your availability: ${confirmationUrl}
-
-- Blood Nexus`
+  message += `\n\nThank you for your support, Blood Nexus`
 
   return message
 }

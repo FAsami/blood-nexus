@@ -60,7 +60,9 @@ export const AddressSchema = z.object({
   streetAddress: z.string().optional(),
   postalCode: z.string().optional(),
   landmark: z.string().optional(),
-  instructions: z.string().optional()
+  instructions: z.string().optional(),
+  latitude: z.number().optional(),
+  longitude: z.number().optional()
 })
 
 export const BloodDonationRequestFormSchema = z.object({

@@ -7,12 +7,14 @@ import { auth } from '@/auth'
 import { findNearbyDonors } from '@/utils/findNearbyDonors'
 import { sendMessage } from '@/utils/sendMessage'
 import { donationRequestMessage } from '@/template/donationRequest'
+import { Address } from '@prisma/client'
 
 const POST = async (
   req: NextRequest
 ): Promise<NextResponse<SubmitBloodDonationRequestResponse>> => {
   try {
     const session = await auth()
+
     if (!session) {
       return NextResponse.json({
         success: false,
@@ -146,35 +148,46 @@ const POST = async (
       latitude: bloodDonationRequest?.address?.latitude || 0,
       longitude: bloodDonationRequest?.address?.longitude || 0
     })
-    console.log(potentialDonors)
-
-    for (const donor of potentialDonors) {
-      const confirmationUrl = `${process.env.NEXT_PUBLIC_APP_URL}/donate/confirm/${result.id}?donorId=${donor.id}`
-
-      const message = donationRequestMessage({
-        bloodGroup: data.donationRequest.bloodGroup,
-        location: {
-          district: data.address.district,
-          division: data.address.division,
-          upazila: data.address.upazila
-        },
-        requiredOn: data.donationRequest.requiredOn,
-        confirmationUrl,
-        distance: donor.distance,
-        duration: donor.duration,
-        unit: data.donationRequest.unit,
-        priority: data.donationRequest.priority
-      })
-
-      try {
-        await sendMessage({
-          phone: donor.phone || '',
-          message
-        })
-      } catch (error) {
-        console.error(`Failed to send message to donor ${donor.id}:`, error)
+    await prismaClient.bloodDonationRequest.update({
+      where: {
+        id: data.donationRequestId
+      },
+      data: {
+        donorId: potentialDonors[0].id
       }
-    }
+    })
+
+    await Promise.all(
+      potentialDonors.map(async (donor) => {
+        await prismaClient.requestedDonor.create({
+          data: {
+            bloodDonationRequestId: result.id,
+            userId: donor.id,
+            status: 'PENDING'
+          }
+        })
+
+        const confirmationUrl = `${process.env.NEXT_PUB}/donate/confirm/${result.id}?donorId=${donor.id}`
+
+        const message = donationRequestMessage({
+          bloodGroup: data.donationRequest.bloodGroup,
+          location: data.address as Address,
+          requiredOn: data.donationRequest.requiredOn,
+          confirmationUrl,
+          unit: data.donationRequest.unit,
+          priority: data.donationRequest.priority
+        })
+
+        try {
+          await sendMessage({
+            phone: donor.phone || '',
+            message
+          })
+        } catch (error) {
+          console.error(`Failed to send message to donor ${donor.id}:`, error)
+        }
+      })
+    )
 
     return NextResponse.json({
       success: true,
