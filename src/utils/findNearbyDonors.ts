@@ -49,8 +49,8 @@ export async function findNearbyDonors({
       }
     }
   })
-  return donors
   console.log('donors', donors)
+  return donors
 
   const donorsWithDistance = await Promise.all(
     donors.map(async (donor) => {

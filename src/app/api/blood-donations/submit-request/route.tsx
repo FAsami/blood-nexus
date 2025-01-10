@@ -4,7 +4,7 @@ import { NextResponse } from 'next/server'
 import { prismaClient } from '@/lib/prismaClient'
 import { BloodDonationRequestFormInput } from '@/schema/donation-request'
 import { auth } from '@/auth'
-import { findNearbyDonors } from '@/utils/findNearbyDonors'
+// import { findNearbyDonors } from '@/utils/findNearbyDonors'
 import { sendMessage } from '@/utils/sendMessage'
 import { donationRequestMessage } from '@/template/donationRequest'
 import { Address } from '@prisma/client'
@@ -143,22 +143,19 @@ const POST = async (
       }
     })
 
-    const potentialDonors = await findNearbyDonors({
-      bloodGroup: data.donationRequest.bloodGroup,
-      latitude: bloodDonationRequest?.address?.latitude || 0,
-      longitude: bloodDonationRequest?.address?.longitude || 0
-    })
-    await prismaClient.bloodDonationRequest.update({
+    // const potentialDonors = await findNearbyDonors({
+    //   bloodGroup: data.donationRequest.bloodGroup,
+    //   latitude: bloodDonationRequest?.address?.latitude || 0,
+    //   longitude: bloodDonationRequest?.address?.longitude || 0
+    // })
+    const donors = await prismaClient.user.findMany({
       where: {
-        id: data.donationRequestId
-      },
-      data: {
-        donorId: potentialDonors[0].id
+        id: { notIn: [session.user.id] }
       }
     })
 
     await Promise.all(
-      potentialDonors.map(async (donor) => {
+      donors.map(async (donor) => {
         await prismaClient.requestedDonor.create({
           data: {
             bloodDonationRequestId: result.id,

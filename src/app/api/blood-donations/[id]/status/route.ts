@@ -45,54 +45,88 @@ export async function PATCH(
       )
     }
 
-    const updatedRequest = await prismaClient.$transaction(async (tx) => {
-      const request = await tx.bloodDonationRequest.update({
+    // First, check if the request exists and get its current state
+    const existingRequest = await prismaClient.bloodDonationRequest.findUnique({
+      where: {
+        id: params.id
+      },
+      include: {
+        requestedDonors: {
+          where: {
+            userId: session.user.id
+          }
+        }
+      }
+    })
+
+    if (!existingRequest) {
+      throw new Error('Blood donation request not found')
+    }
+
+    // Check if user is allowed to update the status
+    if (status === 'ACCEPTED' && existingRequest.requestedDonors.length === 0) {
+      throw new Error('You are not invited to this donation request')
+    }
+
+    // Update the blood donation request
+    const updatedRequest = await prismaClient.bloodDonationRequest.update({
+      where: {
+        id: params.id
+      },
+      data: {
+        status,
+        donorId: ['ACCEPTED', 'COMPLETED'].includes(status)
+          ? session.user.id
+          : undefined,
+        updatedAt: new Date()
+      }
+    })
+
+    // Handle additional updates based on status
+    if (status === 'COMPLETED') {
+      await prismaClient.user.update({
+        where: { id: session.user.id },
+        data: { lastDonatedOn: new Date() }
+      })
+
+      await prismaClient.requestedDonor.update({
         where: {
-          id: params.id,
-          OR: [{ requesterId: session.user.id }, { donorId: session.user.id }]
+          bloodDonationRequestId_userId: {
+            bloodDonationRequestId: params.id,
+            userId: session.user.id
+          }
+        },
+        data: { status: 'COMPLETED' }
+      })
+    }
+
+    if (status === 'ACCEPTED') {
+      // Update the current user's request status
+      await prismaClient.requestedDonor.update({
+        where: {
+          bloodDonationRequestId_userId: {
+            bloodDonationRequestId: params.id,
+            userId: session.user.id
+          }
         },
         data: {
-          status,
-          donorId: status === 'ACCEPTED' ? session.user.id : undefined,
-          updatedAt: new Date()
+          status: 'ACCEPTED'
         }
       })
 
-      if (status === 'COMPLETED') {
-        await tx.user.update({
-          where: { id: session.user.id },
-          data: { lastDonatedOn: new Date() }
-        })
-      }
-
-      if (status === 'ACCEPTED') {
-        await tx.requestedDonor.update({
-          where: {
-            bloodDonationRequestId_userId: {
-              bloodDonationRequestId: params.id,
-              userId: session.user.id
-            }
-          },
-          data: {
-            status: 'ACCEPTED'
+      // Reject other requests
+      await prismaClient.requestedDonor.updateMany({
+        where: {
+          bloodDonationRequestId: params.id,
+          userId: {
+            not: session.user.id
           }
-        })
-
-        await tx.requestedDonor.updateMany({
-          where: {
-            bloodDonationRequestId: params.id,
-            userId: {
-              not: session.user.id
-            }
-          },
-          data: {
-            status: 'REJECTED'
-          }
-        })
-      }
-
-      return request
-    })
+        },
+        data: {
+          status: 'REJECTED'
+        }
+      })
+    }
 
     return NextResponse.json({
       success: true,
