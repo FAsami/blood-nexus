@@ -33,7 +33,7 @@ const BloodDonationRequestConfirmation = ({
         </div>
       </p>
       <div className="flex justify-center mt-6">
-        <Link href="/dashboard">
+        <Link href="/account/blood-donations">
           <Button
             variant="contained"
             className="bg-red-700 hover:bg-red-800 text-white"

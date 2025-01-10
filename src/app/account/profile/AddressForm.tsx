@@ -8,7 +8,7 @@ import { divisions, districts, upazillas } from 'bd-geojs'
 import { AddressInput, AddressSchema } from '@/schema/donation-request'
 import { UpdateProfileInput } from '@/schema/account'
 import PlaceInput from '@/app/components/PlaceInput'
-import { useTransition } from 'react'
+import { useState, useTransition } from 'react'
 import { GooglePlaceSuggestion } from '@/types/place'
 import axios from 'axios'
 
@@ -191,6 +191,7 @@ const AddressForm = ({
   onSubmit: (data: AddressInput) => void
 }) => {
   const [isPending, startTransition] = useTransition()
+
   const initialAddress: AddressInput = {
     label: initial?.label || '',
     type: initial?.type || 'OTHER',
@@ -202,14 +203,14 @@ const AddressForm = ({
     landmark: initial?.landmark || '',
     instructions: initial?.instructions || ''
   }
-  console.log(initialAddress)
+  const [address, setAddress] = useState<AddressInput>(initialAddress)
 
   const handlePlaceSelect = async (place: GooglePlaceSuggestion) => {
     try {
       const { data } = await axios.get(
         `/api/places/details?placeId=${place.place_id}`
       )
-      console.log(data)
+      setAddress(data.data)
     } catch (error) {
       console.error('Error fetching place details:', error)
     }
@@ -225,7 +226,7 @@ const AddressForm = ({
           isPending={isPending}
         />
       </div>
-      <Form initial={initialAddress} onSubmit={onSubmit} />
+      <Form initial={address} onSubmit={onSubmit} />
     </div>
   )
 }
