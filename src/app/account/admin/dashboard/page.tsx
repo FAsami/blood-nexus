@@ -30,7 +30,11 @@ async function DashboardMetrics() {
         where: { published: true }
       }),
       prismaClient.bloodDonationRequest.count({
-        where: { status: 'ACCEPTED' }
+        where: {
+          status: {
+            in: ['ACCEPTED', 'COMPLETED']
+          }
+        }
       })
     ])
 
