@@ -13,13 +13,28 @@ export async function DELETE(
   }
 
   try {
+    const userWithRoles = await prismaClient.user.findUnique({
+      where: { id: session.user.id },
+      include: {
+        userRoles: {
+          include: {
+            role: true
+          }
+        }
+      }
+    })
+
+    const isAdmin = userWithRoles?.userRoles.some(
+      (userRole) => userRole.role.name === 'ADMIN'
+    )
+
     const blog = await prismaClient.blogPost.findUnique({
       where: {
         id: params.id
       }
     })
 
-    if (!blog || blog.authorId !== session.user.id) {
+    if (!blog || (!isAdmin && blog.authorId !== session.user.id)) {
       return new NextResponse('Unauthorized', { status: 401 })
     }
 
@@ -62,6 +77,72 @@ export async function GET(
     return NextResponse.json(blog)
   } catch (error) {
     console.error('Error fetching blog:', error)
+    return new NextResponse('Internal Server Error', { status: 500 })
+  }
+}
+
+export async function PUT(
+  request: Request,
+  { params }: { params: { id: string } }
+) {
+  const session = await auth()
+
+  if (!session?.user) {
+    return new NextResponse('Unauthorized', { status: 401 })
+  }
+
+  try {
+    const existingBlog = await prismaClient.blogPost.findUnique({
+      where: {
+        id: params.id
+      }
+    })
+
+    if (!existingBlog || existingBlog.authorId !== session.user.id) {
+      return new NextResponse('Unauthorized', { status: 401 })
+    }
+
+    const body = await request.json()
+    const { title, content, excerpt, featuredImage, published, categories } =
+      body
+
+    const updatedBlog = await prismaClient.blogPost.update({
+      where: {
+        id: params.id
+      },
+      data: {
+        title,
+        content,
+        excerpt,
+        featuredImage,
+        published,
+        ...(categories && {
+          categories: {
+            deleteMany: {},
+            create: categories.map((categoryId: string) => ({
+              categoryId
+            }))
+          }
+        })
+      },
+      include: {
+        author: {
+          select: {
+            name: true,
+            image: true
+          }
+        },
+        categories: {
+          include: {
+            category: true
+          }
+        }
+      }
+    })
+
+    return NextResponse.json(updatedBlog)
+  } catch (error) {
+    console.error('Error updating blog:', error)
     return new NextResponse('Internal Server Error', { status: 500 })
   }
 }

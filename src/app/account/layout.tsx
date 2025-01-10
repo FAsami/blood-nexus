@@ -46,11 +46,6 @@ const adminNavigationItems: NavigationItem[] = [
     href: '/account/admin/manage-requests'
   },
   {
-    label: 'Manage blogs',
-    icon: <Article />,
-    href: '/account/admin/manage-blogs'
-  },
-  {
     label: 'Manage users',
     icon: <FaUsers />,
     href: '/account/admin/manage-users'
