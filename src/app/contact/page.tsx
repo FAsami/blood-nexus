@@ -242,20 +242,25 @@ const ContactPage = () => {
               />
             ))}
 
-            <Button
-              type="submit"
-              variant="contained"
-              fullWidth
-              size="large"
-              disabled={isPending}
-              style={{
-                backgroundColor: '#000',
-                color: '#fff',
-                boxShadow: 'none'
-              }}
-            >
-              {isPending ? 'Sending...' : 'Send Message'}
-            </Button>
+            <div className="flex justify-end">
+              <Button
+                type="submit"
+                variant="contained"
+                fullWidth
+                size="medium"
+                sx={{
+                  borderRadius: '24px',
+                  boxShadow: 'none',
+                  width: 'fit-content',
+                  whiteSpace: 'nowrap',
+                  px: 2,
+                  py: 1
+                }}
+                disabled={isPending}
+              >
+                {isPending ? 'Sending...' : 'Send Message'}
+              </Button>
+            </div>
           </form>
         </div>
       </div>

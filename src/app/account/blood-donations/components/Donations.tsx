@@ -5,30 +5,24 @@ import {
   TableHead,
   TableRow,
   Chip,
-  Typography
+  Typography,
+  CircularProgress,
+  Box
 } from '@mui/material'
 import { format } from 'date-fns'
 import { useQuery } from '@tanstack/react-query'
 import axios from 'axios'
-import { useSession } from 'next-auth/react'
 import { BloodDonationRequest, User, Address } from '@prisma/client'
+import { formatAddress } from '@/utils/formatAddress'
+import { formatBloodGroup } from '@/utils/formatBloodGroup'
 
 type BloodDonationWithRelations = BloodDonationRequest & {
   requester: User | null
   donor: User | null
-  address: Pick<
-    Address,
-    | 'division'
-    | 'district'
-    | 'upazila'
-    | 'streetAddress'
-    | 'postalCode'
-    | 'landmark'
-  >
+  address: Address
 }
 
 const Donations = () => {
-  const { data: session } = useSession()
   const {
     data: donations,
     isLoading: donationsLoading,
@@ -38,8 +32,7 @@ const Donations = () => {
     queryFn: async () => {
       const response = await axios.get('/api/blood-donations/history', {
         params: {
-          type: 'donations',
-          userId: session?.user?.id
+          type: 'donations'
         }
       })
       if (!response.data.success) {
@@ -77,7 +70,11 @@ const Donations = () => {
   }
 
   if (donationsLoading) {
-    return <Typography>Loading...</Typography>
+    return (
+      <Box display="flex" justifyContent="center" p={2}>
+        <CircularProgress />
+      </Box>
+    )
   }
 
   if (donationsError) {
@@ -101,16 +98,14 @@ const Donations = () => {
         <TableBody>
           {donations?.map((donation) => (
             <TableRow key={donation.id}>
-              <TableCell>{donation.bloodGroup.replace('_', ' ')}</TableCell>
+              <TableCell>{formatBloodGroup(donation.bloodGroup)}</TableCell>
               <TableCell>
                 {format(new Date(donation.requiredOn), 'PPP')}
               </TableCell>
               <TableCell>{donation.unit}</TableCell>
               <TableCell>
                 <Typography variant="body2">
-                  {donation.address.division}, {donation.address.district},{' '}
-                  {donation.address.upazila}, {donation.address.streetAddress},{' '}
-                  {donation.address.postalCode}, {donation.address.landmark}
+                  {formatAddress(donation.address)}
                 </Typography>
               </TableCell>
               <TableCell>

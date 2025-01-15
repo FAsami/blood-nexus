@@ -1,7 +1,15 @@
 'use client'
 
 import { useTransition, useState } from 'react'
-import { Button, Tabs, Tab, Skeleton, Snackbar, Alert } from '@mui/material'
+import {
+  Button,
+  Tabs,
+  Tab,
+  Snackbar,
+  Alert,
+  CircularProgress,
+  Box
+} from '@mui/material'
 import { ProfileInformationForm } from './ProfileInformationForm'
 import { UpdateProfileInput } from '@/schema/account'
 import axios, { AxiosError } from 'axios'
@@ -59,24 +67,15 @@ const ProfilePage = () => {
 
   if (isLoading)
     return (
-      <div className="max-w-2xl space-y-2">
-        <Skeleton className="rounded-md" variant="rectangular" height={50} />
-
-        <div className="px-48 mb-12">
-          <Skeleton variant="rectangular" height={200} />
-        </div>
-        <Skeleton className="rounded-md" variant="rectangular" height={50} />
-        <Skeleton className="rounded-md" variant="rectangular" height={50} />
-        <Skeleton className="rounded-md" variant="rectangular" height={50} />
-        <Skeleton className="rounded-md" variant="rectangular" height={50} />
-        <Skeleton className="rounded-md" variant="rectangular" height={50} />
-      </div>
+      <Box display="flex" justifyContent="center" p={2}>
+        <CircularProgress />
+      </Box>
     )
   if (error) return <div>Error: {error.message}</div>
 
   return (
     <div className="max-w-2xl">
-      <div className="sticky top-0 z-10 bg-white">
+      <div className="sticky top-0 z-10 bg-white py-3">
         <div className="flex justify-between items-center shadow-sm">
           <Tabs
             value={selectedTab}
@@ -94,14 +93,16 @@ const ProfilePage = () => {
               variant="contained"
               fullWidth
               size="medium"
-              className="w-fit whitespace-nowrap px-4 py-2 shadow-sm"
+              sx={{
+                borderRadius: '24px',
+                boxShadow: 'none',
+                width: 'fit-content',
+                whiteSpace: 'nowrap',
+                px: 2,
+                py: 1
+              }}
               disabled={isPending}
               form={selectedTab === 0 ? 'profile-form' : 'address-form'}
-              style={{
-                backgroundColor: '#000',
-                color: '#fff',
-                boxShadow: 'none'
-              }}
             >
               {isPending ? 'Updating Profile...' : 'Update Profile'}
             </Button>
