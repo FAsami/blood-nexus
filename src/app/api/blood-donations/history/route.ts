@@ -2,12 +2,12 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prismaClient } from '@/lib/prismaClient'
 import { ApiResponse } from '@/types/api'
 import { BloodDonationRequest } from '@prisma/client'
+import { auth } from '@/auth'
 
 async function GET(request: NextRequest) {
-  const userId = request.nextUrl.searchParams.get('userId')
+  const session = await auth()
   const type = request.nextUrl.searchParams.get('type') || 'donations'
-  console.log(userId, type)
-  if (!userId) {
+  if (!session?.user.id) {
     const errorResponse: ApiResponse<null> = {
       success: false,
       data: null,
@@ -27,10 +27,10 @@ async function GET(request: NextRequest) {
     where: {
       ...(type === 'donations'
         ? {
-            donorId: userId
+            donorId: session?.user.id
           }
         : {
-            requesterId: userId
+            requesterId: session?.user.id
           })
     },
     include: {

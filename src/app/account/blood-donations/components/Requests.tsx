@@ -5,30 +5,24 @@ import {
   TableHead,
   TableRow,
   Chip,
-  Typography
+  Typography,
+  CircularProgress,
+  Box
 } from '@mui/material'
 import { format } from 'date-fns'
 import { useQuery } from '@tanstack/react-query'
 import axios from 'axios'
-import { useSession } from 'next-auth/react'
 import { BloodDonationRequest, User, Address } from '@prisma/client'
+import { formatBloodGroup } from '@/utils/formatBloodGroup'
+import { formatAddress } from '@/utils/formatAddress'
 
 type BloodDonationWithRelations = BloodDonationRequest & {
   requester: User | null
   donor: User | null
-  address: Pick<
-    Address,
-    | 'division'
-    | 'district'
-    | 'upazila'
-    | 'streetAddress'
-    | 'postalCode'
-    | 'landmark'
-  >
+  address: Address
 }
 
 const Requests = () => {
-  const { data: session } = useSession()
   const {
     data: requests,
     isLoading: requestsLoading,
@@ -38,8 +32,7 @@ const Requests = () => {
     queryFn: async () => {
       const response = await axios.get('/api/blood-donations/history', {
         params: {
-          type: 'requests',
-          userId: session?.user?.id
+          type: 'requests'
         }
       })
       if (!response.data.success) {
@@ -79,7 +72,11 @@ const Requests = () => {
   }
 
   if (requestsLoading) {
-    return <Typography>Loading...</Typography>
+    return (
+      <Box display="flex" justifyContent="center" p={2}>
+        <CircularProgress />
+      </Box>
+    )
   }
 
   if (requestsError) {
@@ -103,16 +100,14 @@ const Requests = () => {
         <TableBody>
           {requests?.map((request) => (
             <TableRow key={request.id}>
-              <TableCell>{request.bloodGroup.replace('_', ' ')}</TableCell>
+              <TableCell>{formatBloodGroup(request.bloodGroup)}</TableCell>
               <TableCell>
                 {format(new Date(request.requiredOn), 'PPP')}
               </TableCell>
               <TableCell>{request.unit}</TableCell>
               <TableCell>
                 <Typography variant="body2">
-                  {request.address.division}, {request.address.district},{' '}
-                  {request.address.upazila}, {request.address.streetAddress},{' '}
-                  {request.address.postalCode}, {request.address.landmark}
+                  {formatAddress(request.address)}
                 </Typography>
               </TableCell>
               <TableCell>
