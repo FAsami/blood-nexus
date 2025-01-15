@@ -23,7 +23,9 @@ const Header = async () => {
             <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4 mb-1 sm:mb-0 w-full sm:w-auto">
               <div className="flex items-center text-white t">
                 <FaEnvelope className="h-3 w-3 md:h-4 md:w-4 mr-1" />
-                <span>contact@roktodan.org</span>
+                <Link href="mailto:blood.nexus.org@gmail.com">
+                  blood.nexus.org@gmail.com
+                </Link>
               </div>
             </div>
             <div className="flex space-x-3">
