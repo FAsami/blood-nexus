@@ -32,7 +32,7 @@
     "bangladesh-geocode": "^1.0.0",
     "bcryptjs": "^2.4.3",
     "bd-geojs": "^1.0.1",
-    "cloudinary": "^2.5.1",
+    "cloudinary": "^2.7.0",
     "clsx": "^2.1.1",
     "crypto-js": "^4.2.0",
     "date-fns": "^4.1.0",
